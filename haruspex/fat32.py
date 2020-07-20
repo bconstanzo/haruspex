@@ -22,6 +22,9 @@ ATTRIBUTES = {
     "archive"  : 0x20,
 }
 
+FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_-")
+
+
 
 class FileRecord:
     def __init__(self, data):
@@ -37,6 +40,38 @@ class FileRecord:
         self._ts_mod     = None
         # that's all for real attributes of a file record
         self.verbose     = False
+    # The Properties
+    # (these could be done with metaclasses, but...)
+
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, value):
+        if isinstance(value, str):
+            value = bytes(value, "utf-8")
+        name = b"".join([c for c in value.upper() if c in FILENAME_CHARS])
+        name = name[:8],   # byebye long names!
+        # let's check if there's an ext, for the lazy user
+        if b"." in value:
+            name, dot, ext = value.rpartition(b".")
+            self._ext = ext[-3:]
+        self._name = value # 
+        # will not enforce name uniqueness, just being uppercase and within
+        # valid range of characters
+    
+    @property
+    def ext(self):
+        return self._ext
+    
+    @ext.setter
+    def ext(self, value):
+        if isinstance(value, str):
+            value = bytes(value, "utf-8")
+        ext = b"".join([c for c in value.upper() if c in FILENAME_CHARS])
+        ext = ext[:3]
+        self._ext = ext
     
     def __repr__(self):
         if self.verbose:

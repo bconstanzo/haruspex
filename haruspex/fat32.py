@@ -8,6 +8,9 @@ import sys
 
 from collections import namedtuple
 
+# TODO: read https://stackoverflow.com/questions/13775893/converting-struct-to-byte-and-back-to-struct
+#       and research a bit into this being a reasonable way to convert bytes
+#       into structs (and back).
 
 attributes = {
     "read-only": 0x01, 

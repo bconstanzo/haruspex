@@ -12,7 +12,8 @@ from collections import namedtuple
 #       and research a bit into this being a reasonable way to convert bytes
 #       into structs (and back).
 
-attributes = {
+
+ATTRIBUTES = {
     "read-only": 0x01, 
     "hidden"   : 0x02,
     "system"   : 0x04,
@@ -29,6 +30,7 @@ class FileRecord:
         self._ext        = b""
         self._size       = -1
         self._attributes = {k: False for k in attributes}
+        self._attributes = {k: False for k in ATTRIBUTES}
         self._cluster    = -1
         self._ts_create  = None
         self._ts_last    = None

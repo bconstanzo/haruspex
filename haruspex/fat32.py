@@ -22,7 +22,7 @@ ATTRIBUTES = {
     "archive"  : 0x20,
 }
 
-FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_-")
+FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_- ")
 
 
 def read_time(bytes_, mili=b"\x00"):
@@ -89,13 +89,16 @@ class FileRecord:
     def name(self, value):
         if isinstance(value, str):
             value = bytes(value, "utf-8")
-        name = b"".join([c for c in value.upper() if c in FILENAME_CHARS])
+        value = value.upper()  # not supporting long names for the moment
+        name = b"".join([c for c in value if c in FILENAME_CHARS])
         name = name[:8],   # byebye long names!
         # let's check if there's an ext, for the lazy user
         if b"." in value:
             name, dot, ext = value.rpartition(b".")
+            ext = ext.rstrip()
             self._ext = ext[-3:]
-        self._name = value # 
+        name = name.rstrip()
+        self._name = name # 
         # will not enforce name uniqueness, just being uppercase and within
         # valid range of characters
     
@@ -107,7 +110,9 @@ class FileRecord:
     def ext(self, value):
         if isinstance(value, str):
             value = bytes(value, "utf-8")
-        ext = b"".join([c for c in value.upper() if c in FILENAME_CHARS])
+        value = value.upper()
+        ext = b"".join([c for c in value if c in FILENAME_CHARS])
+        ext = ext.rstrip()
         ext = ext[:3]
         self._ext = ext
     

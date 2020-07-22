@@ -25,6 +25,21 @@ ATTRIBUTES = {
 FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_- ")
 
 
+def read_attributes(raw_attrs):
+    """
+    Receives the raw attributes byte, and parses it into a dictionary based on
+    the `ATTRIBUTES` constant.
+
+    :param raw_attrs: bytes object, only the first byte is used
+    :return: dictionary with the corresponding attributes and their bool value
+    """
+    value = raw_attrs[0]
+    ret = {}
+    for k, v in ATTRIBUTES.items():
+        ret[k] = bool(value & v)
+    return ret
+
+
 def read_time(bytes_, mili=b"\x00"):
     """
     Receives date + time bytes in `bytes`, and returns a datetime object.

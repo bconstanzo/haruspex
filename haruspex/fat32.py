@@ -64,6 +64,7 @@ class FileRecord:
         self._ext        = b""
         self._size       = -1
         self._attributes = {k: False for k in ATTRIBUTES}
+        self._flags      = 0  # reserved, should be 0 but different implementations may use it 
         self._cluster    = -1
         self._ts_create  = None
         self._ts_last    = None
@@ -135,6 +136,14 @@ class FileRecord:
         # let's cleanup in case the given dict has some extra keys
         value = {k:v for k, v in value.items() if k in ATTRIBUTES}
         self._attributes.update(value)
+    
+    @property
+    def flags(self):
+        return self._flags
+    
+    @flags.setter
+    def flags(self, value):
+        pass  # let's keep this read-only for the moment
     
     def __repr__(self):
         return f"< DirectoryEntry: {self.name}.{self.ext}>"

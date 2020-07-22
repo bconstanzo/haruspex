@@ -69,7 +69,6 @@ class FileRecord:
         self._ts_last    = None
         self._ts_mod     = None
         # that's all for real attributes of a file record
-        self.verbose     = False
         self._parse()
     
     # The Properties
@@ -133,20 +132,24 @@ class FileRecord:
         self._attributes.update(value)
     
     def __repr__(self):
-        if self.verbose:
-            return (
-                f"< DirectoryEntry: {self.name}.{self.ext}\n"
-                f"  {'size':12}:{self.size:>12}\n" 
-                f"  {'attributes':12}:{self._attrs2str():>12}\n" 
-                f"  {'cluster':12}:{self.cluster:>12}\n" 
-                f"  {'created':12}:{self.created:>12}\n" 
-                f"  {'modified':12}:{self.modified:>12}\n" 
-                f"  {'accessed':12}:{self.accessed:>12}\n" 
-                f">"
-            )
         return f"< DirectoryEntry: {self.name}.{self.ext}>"
     
+    def __str__(self):
+        return (
+               f"< DirectoryEntry: {self.name}.{self.ext}\n"
+               f"  {'size':12}:{self.size:>12}\n" 
+               f"  {'attributes':12}:{self._attrs2str():>12}\n" 
+               f"  {'cluster':12}:{self.cluster:>12}\n" 
+               f"  {'created':12}:{self.created:>12}\n" 
+               f"  {'modified':12}:{self.modified:>12}\n" 
+               f"  {'accessed':12}:{self.accessed:>12}\n" 
+               f">"
+        )
+    
     def _attrs2str(self):
+        """
+        Helper function for pretty-printing the attributes in __str__.
+        """
         ret = [
             k[0].upper() if v else k[0]
             for (k, v) in self._attributes.items()

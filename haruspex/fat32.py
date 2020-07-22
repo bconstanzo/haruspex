@@ -25,13 +25,36 @@ ATTRIBUTES = {
 FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_-")
 
 
-def _fat32_time(bytes_, mili=b"\x00"):
+def read_time(bytes_, mili=b"\x00"):
     """
     Receives date + time bytes in `bytes`, and returns a datetime object.
-    Checks for pathological 0xffff patterns
+    Checks for pathological 0xffff patterns.
     """
-    raw_date, raw_time, = struct.unpack(">HH", bytes_)
-    seconds += mili[0] / 200
+    raw_time, raw_date, = struct.unpack("<HH", bytes_)
+    # first we take care of the date
+    year    = (raw_date >> 9) + 1980
+    month   = (raw_date & 0b0000000111100000) >> 5
+    day     =  raw_date & 0b0000000000011111
+    # and now the time
+    hour    =  raw_time >> 11
+    minute  = (raw_time & 0b0000011111100000) >> 5
+    second  = (raw_time & 0b0000000000011111) * 2
+    second += mili[0] // 100
+    micros  = (mili[0] % 100) * 1000
+    # we know theres an issue in some Linux based systems that make
+    # 0xffffffff datetimes for some FileRecords (that don't seem to belong to
+    # the files, some kind of temporary record) so we must check a few things:
+    if month >= 12:
+        month = 12
+    if hour >= 23:
+        hour = 23
+    if minute >= 59:
+        minute = 59
+    if second >= 59:
+        second = 59
+    # that gives a few sanity checks and should catch that particular issue
+    dt = datetime.datetime(year, month, day, hour, minute, second, micros)
+    return dt
 
 
 class FileRecord:

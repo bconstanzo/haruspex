@@ -42,8 +42,14 @@ def read_attributes(raw_attrs):
 
 def read_time(bytes_, mili=b"\x00"):
     """
-    Receives date + time bytes in `bytes`, and returns a datetime object.
+    Receives time + date bytes in `bytes_`, and returns a datetime object.
     Checks for pathological 0xffff patterns.
+
+    :param bytes_: raw value, made from the the time+date fields in the raw
+        directory entry/file record.
+    :param mili: the raw byte that encodes the 10 milisecond precision, for
+        timestamps that support it (defaults to 0)
+    :return: datetime.datetime object
     """
     raw_time, raw_date, = struct.unpack("<HH", bytes_)
     # first we take care of the date

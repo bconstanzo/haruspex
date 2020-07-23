@@ -255,13 +255,14 @@ class FileRecord:
     
     def __str__(self):
         return (
-               f"< DirectoryEntry: {self.name}.{self.ext}\n"
-               f"  {'size':12}:{self.size:>12}\n" 
-               f"  {'attributes':12}:{self._attrs2str():>12}\n" 
-               f"  {'cluster':12}:{self.cluster:>12}\n" 
-               f"  {'created':12}:{self.created:>12}\n" 
-               f"  {'last_access':12}:{self.last_access:>12}\n" 
-               f"  {'modified':12}:{self.modified:>12}\n" 
+               f"< DirectoryEntry: {self.name.decode('utf-8')}"
+                                f".{self.ext.decode('utf-8')}\n"
+               f"    {'size':12}:{self.size:>12}\n" 
+               f"    {'attributes':12}:{self._attrs2str():>12}\n" 
+               f"    {'cluster':12}:{self.cluster:>12}\n" 
+               f"    {'created':12}: {self.created}\n" 
+               f"    {'last_access':12}: {self.last_access}\n" 
+               f"    {'modified':12}: {self.modified}\n" 
                f">"
         )
     

@@ -228,7 +228,7 @@ class FileRecord:
         value = value.replace(hour=0, minute=0, second=0, microsecond=0)
         # technically a date object at this point, but we prefer to keep
         # things consistent and have them all be datetime
-        self._modified = value
+        self._last_access = value
 
     @property
     def modified(self):

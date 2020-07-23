@@ -22,7 +22,16 @@ ATTRIBUTES = {
     "archive"  : 0x20,
 }
 
-FILENAME_CHARS = set(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_- ")
+ALL_ASCII = b"".maketrans(b"", b"")  # a bit hacky, but works
+FILENAME_CHARS = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_- \xe5"
+REMAIN_ASCII = ALL_ASCII
+for idx, char in enumerate(FILENAME_CHARS):
+    char = FILENAME_CHARS[idx:idx + 1]
+    REMAIN_ASCII.replace(char, b"")
+FILENAME_TRANS = b"".maketrans(
+    REMAIN_ASCII,
+    b"\x00" * len(REMAIN_ASCII)
+)
 
 
 def read_attributes(raw_attrs):
@@ -112,7 +121,8 @@ class FileRecord:
         if isinstance(value, str):
             value = bytes(value, "utf-8")
         value = value.upper()  # not supporting long names for the moment
-        name = b"".join([c for c in value if c in FILENAME_CHARS])
+        name = value.translate(FILENAME_TRANS)
+        name = name.replace(b"\x00", b"")
         name = name[:8],   # byebye long names!
         # let's check if there's an ext, for the lazy user
         if b"." in value:
@@ -133,7 +143,8 @@ class FileRecord:
         if isinstance(value, str):
             value = bytes(value, "utf-8")
         value = value.upper()
-        ext = b"".join([c for c in value if c in FILENAME_CHARS])
+        ext = value.translate(FILENAME_TRANS)
+        ext = ext.replace(b"\x00", b"")
         ext = ext.rstrip()
         ext = ext[:3]
         self._ext = ext

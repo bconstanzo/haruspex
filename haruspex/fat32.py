@@ -251,12 +251,15 @@ class FileRecord:
         self._modified = value
     
     def __repr__(self):
-        return f"< DirectoryEntry: {self.name}.{self.ext}>"
+        name = self.name.decode("utf-8")
+        ext  = self.ext.decode("utf-8")
+        return f"< DirectoryEntry: {name}.{ext}>"
     
     def __str__(self):
+        name = self.name.decode("utf-8")
+        ext  = self.ext.decode("utf-8")
         return (
-               f"< DirectoryEntry: {self.name.decode('utf-8')}"
-                                f".{self.ext.decode('utf-8')}\n"
+               f"< DirectoryEntry: {name}.{ext}\n"
                f"    {'size':12}:{self.size:>12}\n" 
                f"    {'attributes':12}:{self._attrs2str():>12}\n" 
                f"    {'cluster':12}:{self.cluster:>12}\n" 

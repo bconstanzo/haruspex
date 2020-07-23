@@ -87,9 +87,9 @@ class FileRecord:
         self._attributes = {k: False for k in ATTRIBUTES}
         self._flags      = 0  # reserved, should be 0 but different implementations may use it 
         self._cluster    = -1
-        self._ts_create  = None
-        self._ts_last    = None
-        self._ts_mod     = None
+        self._created    = None
+        self._last_access= None
+        self._modified   = None
         # that's all for real attributes of a file record
         self._parse()
     
@@ -165,6 +165,80 @@ class FileRecord:
     @flags.setter
     def flags(self, value):
         pass  # let's keep this read-only for the moment
+
+    @property
+    def cluster(self):
+        return self._cluster
+    
+    @cluster.setter
+    def cluster(self, value):
+        if value > 0xffffffff:
+            value = 0xffffffff
+        # no point in checking anything else, the filesystem should make
+        # sure there's no invalid cluster set
+        self._cluster = value
+    
+    @property
+    def created(self):
+        return self._created
+    
+    @created.setter
+    def created(self, value):
+        # truth is, python's datetime object handles a lot already
+        # so we only need to check the year
+        year = value.year
+        if year < 1980:
+            year = 1980
+            value = value.replace(year=year)
+        elif year > 2107:
+            year = 2107
+            value = value.replace(year=year)
+        micros = value.microsecond
+        micros = (micros // 10000) * 10000  # let's be honest about the precision
+        value.replace(microsecond=micros)
+        self._created = value
+
+    # last_access
+    @property
+    def last_access(self):
+        return self._last_access
+    
+    @last_access.setter
+    def last_access(self, value):
+        # truth is, python's datetime object handles a lot already
+        # so we only need to check the year
+        year = value.year
+        if year < 1980:
+            year = 1980
+            value = value.replace(year=year)
+        elif year > 2107:
+            year = 2107
+            value = value.replace(year=year)
+        # and here we erase the time
+        value = value.replace(hour=0, minute=0, second=0, microsecond=0)
+        # technically a date object at this point, but we prefer to keep
+        # things consistent and have them all be datetime
+        self._modified = value
+
+    @property
+    def modified(self):
+        return self._modified
+    
+    @modified.setter
+    def modified(self, value):
+        # truth is, python's datetime object handles a lot already
+        # so we only need to check the year
+        year = value.year
+        if year < 1980:
+            year = 1980
+            value = value.replace(year=year)
+        elif year > 2107:
+            year = 2107
+            value = value.replace(year=year)
+        second = value.second
+        second = (second // 2) * 2  # let's be honest about the precision
+        value = value.replace(second=second)
+        self._modified = value
     
     def __repr__(self):
         return f"< DirectoryEntry: {self.name}.{self.ext}>"

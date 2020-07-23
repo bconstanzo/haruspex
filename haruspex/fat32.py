@@ -260,8 +260,8 @@ class FileRecord:
                f"  {'attributes':12}:{self._attrs2str():>12}\n" 
                f"  {'cluster':12}:{self.cluster:>12}\n" 
                f"  {'created':12}:{self.created:>12}\n" 
+               f"  {'last_access':12}:{self.last_access:>12}\n" 
                f"  {'modified':12}:{self.modified:>12}\n" 
-               f"  {'accessed':12}:{self.accessed:>12}\n" 
                f">"
         )
     

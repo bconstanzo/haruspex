@@ -34,7 +34,7 @@ FILENAME_TRANS = b"".maketrans(
 )
 
 
-def read_attributes(raw_attrs):
+def read_attributes(value):
     """
     Receives the raw attributes byte, and parses it into a dictionary based on
     the `ATTRIBUTES` constant.
@@ -42,7 +42,6 @@ def read_attributes(raw_attrs):
     :param raw_attrs: bytes object, only the first byte is used
     :return: dictionary with the corresponding attributes and their bool value
     """
-    value = raw_attrs[0]
     ret = {}
     for k, v in ATTRIBUTES.items():
         ret[k] = bool(value & v)

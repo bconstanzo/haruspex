@@ -278,9 +278,19 @@ class FileRecord:
     
     def _parse(self):
         """
-        Parses self._raw_data and updates the properties
+        Parses self._raw_data and updates the properties of the file.
         """
-        pass
+        # TODO: maybe it should be called load? or just parse?
+        #       will define it better after having a dump() or save() method
+        self.name        = self._raw_data[0:8] + b"." + self._raw_data[8:11]
+        # we use the shorthand that sets name and extension in a single pass
+        self.size,       = struct.unpack("<L", self._raw_data[28:32])
+        self.attributes  = read_attributes(self._raw_data[11])
+        self.flags       = self._raw_data[12]
+        self.cluster,    = struct.unpack("<L", self._raw_data[26:28] + self._raw_data[20:22])
+        self.created     = read_time(self._raw_data[14:18], mili=self._raw_data[13])
+        self.last_access = read_time(b"\x00\x00" + self._raw_data[18:20])
+        self.modified    = read_time(self._raw_data[22:26])
 
 
 class Filesystem:

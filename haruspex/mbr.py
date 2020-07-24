@@ -1,7 +1,7 @@
 import struct
 
 
-class Record:
+class Partition:
     """Handles one entry in the MBR table."""
     partition_types = {
         0x00: "Empty",
@@ -84,7 +84,7 @@ class Table:
             lambda x: x != b"\x00" * 16,  # filter out empty partitions
             (data[i * 16: i * 16 + 16] for i in range(4))
         )
-        self.partitions = [Record(p) for p in p_parts]
+        self.partitions = [Partition(p) for p in p_parts]
         # this implementation is "good enough", but not thorough
         # -- the legacy files have a larger implementation that includes
         #    extended partitions parsing

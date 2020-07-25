@@ -89,6 +89,9 @@ def read_time(bytes_, mili=0):
 
 
 class FileRecord:
+    """
+    An entry inside a FAT32 directory.
+    """
     def __init__(self, data):
         self._raw_data   = data
         self._name       = b""
@@ -107,6 +110,9 @@ class FileRecord:
     # (these could be done with metaclasses, but...)
     @property
     def raw_data(self):
+        """
+        The raw bytes used to initialize the File Record. Read only for now.
+        """
         return self._raw_data
     
     @raw_data.setter
@@ -115,6 +121,12 @@ class FileRecord:
 
     @property
     def name(self):
+        """
+        The name of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk.
+        """
         return self._name
     
     @name.setter
@@ -137,6 +149,12 @@ class FileRecord:
     
     @property
     def ext(self):
+        """
+        The extension of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk.
+        """
         return self._ext
     
     @ext.setter
@@ -152,6 +170,13 @@ class FileRecord:
     
     @property
     def size(self):
+        """
+        The size of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk. Values larger than
+        0xffffffff are truncated at it.
+        """
         return self._size
     
     @size.setter
@@ -162,6 +187,12 @@ class FileRecord:
     
     @property
     def attributes(self):
+        """
+        The attributes of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk.
+        """
         return self._attributes
     
     @attributes.setter
@@ -172,6 +203,13 @@ class FileRecord:
     
     @property
     def flags(self):
+        """
+        The flags of the File Record. Read only.
+
+        This is actually a reserved field, which non-Microsoft implementations
+        use for different purposes. Other than read it, we don't do anything
+        with it.
+        """
         return self._flags
     
     @flags.setter
@@ -180,6 +218,15 @@ class FileRecord:
 
     @property
     def cluster(self):
+        """
+        The first cluster of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk. Same as with size, we
+        simply check for the value to fit in a uint32. The filesystem should
+        be responsible to check that the referenced cluster is valid and not
+        out of range.
+        """
         return self._cluster
     
     @cluster.setter
@@ -192,6 +239,17 @@ class FileRecord:
     
     @property
     def created(self):
+        """
+        The creation timestamp of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk. Those are:
+
+        * Year is set to be in range 1980-2107 (truncated at those values for
+          smaller/larger).
+        * Microsecond accuracy of the datetime object is capped to 10ms
+          resolution (as can be represented in structure)
+        """
         return self._created
     
     @created.setter
@@ -213,6 +271,20 @@ class FileRecord:
     # last_access
     @property
     def last_access(self):
+        """
+        The last accessed timestamp of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk. Those are:
+
+        * Year is set to be in range 1980-2107 (truncated at those values for
+          smaller/larger).
+        * Since the structure only has 2 bytes for a date, the datetimes object
+          hour, minut, second and microsecond are set to 0.
+        
+        It is technically a datetime still to be consistent with the other
+        timestamps.
+        """
         return self._last_access
     
     @last_access.setter
@@ -234,6 +306,17 @@ class FileRecord:
 
     @property
     def modified(self):
+        """
+        The modified timestamp of the File Record.
+
+        When setting this property, checks are made to make sure it can be
+        represented as the packed structure on disk. Those are:
+
+        * Year is set to be in range 1980-2107 (truncated at those values for
+          smaller/larger).
+        * The datetimes object second resolution is cut to 2 second icnrementes
+          (as the on-disk structure allows) and microseconds are set to 0.
+        """
         return self._modified
     
     @modified.setter

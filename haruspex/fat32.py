@@ -22,8 +22,10 @@ ATTRIBUTES = {
     "archive"  : 0x20,
 }
 
+# TODO: this is actually a hack right now, and there might be a simpler way to
+#       do it
 ALL_ASCII = b"".maketrans(b"", b"")  # a bit hacky, but works
-FILENAME_CHARS = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_- \xe5"
+FILENAME_CHARS = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()-@^_`{}~\xe5"
 REMAIN_ASCII = ALL_ASCII
 for idx, char in enumerate(FILENAME_CHARS):
     char = FILENAME_CHARS[idx:idx + 1]

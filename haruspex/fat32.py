@@ -249,7 +249,7 @@ class FileRecord:
             value = value.replace(year=year)
         second = value.second
         second = (second // 2) * 2  # let's be honest about the precision
-        value = value.replace(second=second)
+        value = value.replace(second=second, microsecond=0)
         self._modified = value
     
     def __repr__(self):

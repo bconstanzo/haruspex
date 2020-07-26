@@ -434,10 +434,13 @@ class FAT32:
         )
     
     def _load_fats(self):
+        """
+        Reads the FATs from disk (hardcoded to 2 FATs, because there should
+        only be two of them).
+        """
         spf = self.sectors_per_fat
         bps = self.bytes_per_sector
         self._handle.seek(self.fat1_address)
-        print(f"I want to read {spf * bps} bytes from the handle...")
         raw_fat = self._handle.read(spf * bps)
         self.fat1 = [ v[0] for v in struct.iter_unpack("<L", raw_fat) ]
         # since we're literally where the second FAT starts, we can just read

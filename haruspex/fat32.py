@@ -381,5 +381,66 @@ class FileRecord:
         self.modified    = read_time(self._raw_data[22:26])
 
 
-class Filesystem:
-    pass
+class FAT32:
+    """
+    Class that gathers methods and objects to handle a FAT32 filesystem.
+    """
+    def __init__(self, path, base_address=0):
+        self.path          = path
+        self._base_address = base_address
+        self._handle       = open(path, "rb+")
+        self._handle.seek(base_address)
+        # and now for the header data...}
+        buffer = self._handle.read(512)
+        bps, spc, rs, nof = struct.unpack("<HBHB", buffer[0x0b:0x11])
+        spf, _, rc = struct.unpack("<LLL", buffer[0x24:0x30])
+        self.bytes_per_sector    = bps
+        self.sectors_per_cluster = spc
+        self.reserved_sectors    = rs
+        self.number_of_fats      = nof
+        self.sectors_per_fat     = spf
+        self.root_cluster        = rc
+        # and now some calculations...
+        self.fat1_address = rs * bps
+        self.fat2_address = (rs + spf) * bps
+        self.base_cluster_address = (rs + (nof * spf)) * bps
+        # for all these addresses we have to add the base_address of the
+        # filesystem, otherwise we'll read anywhere on the device/image
+        self.fat1_address += base_address
+        self.fat2_address += base_address
+        self.base_cluster_address += base_address
+        # and now we're set!
+        # I should probably set these to be read only through properties...
+        self.fat1 = []
+        self.fat2 = []
+        self._load_fats()
+    
+    def __repr__(self):
+        return f"< FAT32-Filesystem: @ {self._base_address} of {self.path}>"
+    
+    def __str__(self):
+        return (
+               "< FAT32 Filesystem:"
+               f"    {'base address':24}:{self._base_address}\n"
+               f"    {'sectors per cluster':24}:{self.sectors_per_cluster}\n"
+               f"    {'reserved sectors':24}:{self.reserved_sectors}\n"
+               f"    {'number of FATs':24}:{self.number_of_fats}\n"
+               f"    {'sectors per FAT':24}:{self.sectors_per_fat}\n"
+               f"    {'root cluster':24}:{self.root_cluster}\n"
+               f"    {'FAT1 address':24}:{self.fat1_address}\n"
+               f"    {'FAT2 address':24}:{self.fat2_address}\n"
+               f"    {'base cluster address':24}:{self.base_cluster_address}\n"
+               f">"
+        )
+    
+    def _load_fats(self):
+        spf = self.sectors_per_fat
+        bps = self.bytes_per_sector
+        self._handle.seek(self.fat1_address)
+        print(f"I want to read {spf * bps} bytes from the handle...")
+        raw_fat = self._handle.read(spf * bps)
+        self.fat1 = [ v[0] for v in struct.iter_unpack("<L", raw_fat) ]
+        # since we're literally where the second FAT starts, we can just read
+        # from here on
+        raw_fat = self._handle.read(spf * bps)
+        self.fat2 = [ v[0] for v in struct.iter_unpack("<L", raw_fat) ]

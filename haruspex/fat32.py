@@ -416,20 +416,20 @@ class FAT32:
         self._load_fats()
     
     def __repr__(self):
-        return f"< FAT32-Filesystem: @ {self._base_address} of {self.path}>"
+        return f"< FAT32 @ {self._base_address} of {self.path}>"
     
     def __str__(self):
         return (
-               "< FAT32 Filesystem:"
-               f"    {'base address':24}:{self._base_address}\n"
-               f"    {'sectors per cluster':24}:{self.sectors_per_cluster}\n"
-               f"    {'reserved sectors':24}:{self.reserved_sectors}\n"
-               f"    {'number of FATs':24}:{self.number_of_fats}\n"
-               f"    {'sectors per FAT':24}:{self.sectors_per_fat}\n"
-               f"    {'root cluster':24}:{self.root_cluster}\n"
-               f"    {'FAT1 address':24}:{self.fat1_address}\n"
-               f"    {'FAT2 address':24}:{self.fat2_address}\n"
-               f"    {'base cluster address':24}:{self.base_cluster_address}\n"
+               "< FAT32 Filesystem:\n"
+               f"    {'base address':24}: {self._base_address}\n"
+               f"    {'sectors per cluster':24}: {self.sectors_per_cluster}\n"
+               f"    {'reserved sectors':24}: {self.reserved_sectors}\n"
+               f"    {'number of FATs':24}: {self.number_of_fats}\n"
+               f"    {'sectors per FAT':24}: {self.sectors_per_fat}\n"
+               f"    {'root cluster':24}: {self.root_cluster}\n"
+               f"    {'FAT1 address':24}: {self.fat1_address}\n"
+               f"    {'FAT2 address':24}: {self.fat2_address}\n"
+               f"    {'base cluster address':24}: {self.base_cluster_address}\n"
                f">"
         )
     

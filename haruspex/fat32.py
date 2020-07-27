@@ -381,6 +381,127 @@ class FileRecord:
         self.modified    = read_time(self._raw_data[22:26])
 
 
+class FileHandle:
+    """
+    Class to handle reading (and eventually writing) files in the FAT32
+    filesystem. This class is a lot more involved than pythons standard file
+    object, because it actually deals with the filesystem on a level closer to
+    the OS.
+    """
+    def __init__(self, filesystem, record, mode):
+        self._filesystem = filesystem
+        self._record     = record
+        self._mode       = mode
+        self.path        = (record.name + b"." + record.ext).decode("utf-8")
+        # this is all a lie (yet), we'll just open in "rb" mode
+        # we will try to mimic the IOBase methods as close as possible, without
+        # going crazy in it... right?
+        self.closed       = False
+        # and we'll need a few other attributes as well
+        self._buffer      = bytearray(filesystem._read_cluster(record.cluster))
+        self._buffer_pos  = 0  # for easier handling of the buffer and _file_pos
+        self._buffer_size = filesystem.sectors_per_cluster * filesystem.bytes_per_sector
+            # we buffer a cluster at a time
+        self._ccluster    = record.cluster
+        # we keep track of which cluster we're own to read the next one when
+        # necessary
+        self._file_pos    = 0  # position in the file, .tell() returns this
+        self._readable    = True  # will set along with mode, when supported
+    
+    def __repr__(self):
+        return f"< FileHandle for {self.path}>"
+    
+    def __str__(self):
+        return self.__repr__()
+
+    def __del__(self):
+        # should probably do something about writing, for example
+        # and flusihing changes to disk
+        # once writing is supported, that is
+        pass
+    
+    def close(self):
+        """
+        Closes the file.
+        """
+        self.closed = True
+    
+    def fileno(self):
+        pass
+
+    def flush(self):
+        pass
+
+    def isatty(self):
+        return False
+    
+    def read(self, size=-1):
+        bsize = self._buffer_size
+        bpos  = self._buffer_pos
+        if size < 0:
+            size = self._record.size - self._file_pos
+        ret = []
+        # and now we read
+        while (bsize - bpos) < size:  # we have to read clusters from the chain
+            ret.append(self._buffer[bpos:])
+            size -= (bsize - bpos)
+            self._file_pos += (bsize - bpos)
+            ncluster = self._filesystem.fat1[self._ccluster]
+            if ncluster >= 0x0ffffff0:
+                # magic EOF cluster number, found by trial and error
+                # TODO: check that the cluster is within bounds of the fs
+                break
+            bpos = 0
+            self._ccluster = ncluster
+            self._buffer = bytearray(self._filesystem._read_cluster(ncluster))
+        ret.append(self._buffer[bpos: bpos + size])
+        self._buffer_pos =  size + bpos
+        self._file_pos   += size
+        return b"".join(ret)
+    
+    def readable(self):
+        """
+        Returns whether the file is readable or not.
+        """
+        return self._readable
+    
+    def readlines(self, hint=-1):
+        pass  # not ready to implement this yet
+
+    def seek(self, offset, whence=0):
+        """
+        Moves the file pointer to offset.
+
+        :param offset: position to move the file pointer
+        :param whence: not implemented (yet)
+        :return: the current position of the file pointer, after moving (will
+            be equal to `offset`, unless something goes very wrong)
+        """
+        self._buffer     = bytearray()
+        self._buffer_pos = 0
+        self._file_pos   = 0
+        return self._file_pos
+    
+    def seekable(self):
+        return True  # hardcoded for now, can't think a situation where it won't be
+    
+    def tell(self):
+        """
+        Returns the current position of the file pointer.
+        """
+        return self._file_pos
+    
+    def truncate(self, size=None):
+        pass
+        # will think about implementing this
+    
+    def writeable(self):
+        return False  # hardcoded, will work on this later
+    
+    def writelines(self, lines):
+        pass  # dummy method, for the moment
+
+
 class FAT32:
     """
     Class that gathers methods and objects to handle a FAT32 filesystem.

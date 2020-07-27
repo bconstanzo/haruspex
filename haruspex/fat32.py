@@ -11,6 +11,8 @@ from collections import namedtuple
 # TODO: read https://stackoverflow.com/questions/13775893/converting-struct-to-byte-and-back-to-struct
 #       and research a bit into this being a reasonable way to convert bytes
 #       into structs (and back).
+# TODO: consider widening support for other encodings (eg: latin1, utf-8, etc)
+#       in file/directory names.       
 
 
 ATTRIBUTES = {
@@ -336,13 +338,13 @@ class FileRecord:
         self._modified = value
     
     def __repr__(self):
-        name = self.name.decode("utf-8")
-        ext  = self.ext.decode("utf-8")
+        name = self.name.decode("ascii")
+        ext  = self.ext.decode("ascii")
         return f"< DirectoryEntry: {name}.{ext}>"
     
     def __str__(self):
-        name = self.name.decode("utf-8")
-        ext  = self.ext.decode("utf-8")
+        name = self.name.decode("ascii")
+        ext  = self.ext.decode("ascii")
         return (
                f"< DirectoryEntry: {name}.{ext}\n"
                f"    {'size':12}:{self.size:>12}\n" 
@@ -392,7 +394,7 @@ class FileHandle:
         self._filesystem = filesystem
         self._record     = record
         self._mode       = mode
-        self.path        = (record.name + b"." + record.ext).decode("utf-8")
+        self.path        = (record.name + b"." + record.ext).decode("ascii")
         # this is all a lie (yet), we'll just open in "rb" mode
         # we will try to mimic the IOBase methods as close as possible, without
         # going crazy in it... right?

@@ -437,26 +437,27 @@ class FileHandle:
     
     def read(self, size=-1):
         bsize = self._buffer_size
-        bpos  = self._buffer_pos
+        start = self._buffer_pos
         if size < 0:
             size = self._record.size - self._file_pos
         ret = []
         # and now we read
-        while (bsize - bpos) < size:  # we have to read clusters from the chain
-            ret.append(self._buffer[bpos:])
-            size -= (bsize - bpos)
-            self._file_pos += (bsize - bpos)
+        while (bsize - start) < size:  # we have to read clusters from the chain
+            ret.append(self._buffer[start:])
+            size -= (bsize - start)
+            self._file_pos += (bsize - start)
             ncluster = self._filesystem.fat1[self._ccluster]
             if ncluster >= 0x0ffffff0:
                 # magic EOF cluster number, found by trial and error
                 # TODO: check that the cluster is within bounds of the fs
                 break
-            bpos = 0
+            start = 0
             self._ccluster = ncluster
             self._buffer = bytearray(self._filesystem._read_cluster(ncluster))
-        ret.append(self._buffer[bpos: bpos + size])
-        self._buffer_pos =  size + bpos
-        self._file_pos   += size
+        span = min(self._record.size - self._file_pos, size)
+        ret.append(self._buffer[start: start + span])
+        self._buffer_pos =  start + span
+        self._file_pos   += span
         return b"".join(ret)
     
     def readable(self):
@@ -477,9 +478,26 @@ class FileHandle:
         :return: the current position of the file pointer, after moving (will
             be equal to `offset`, unless something goes very wrong)
         """
-        self._buffer     = bytearray()
-        self._buffer_pos = 0
-        self._file_pos   = 0
+        filesystem = self._filesystem
+        record     = self._record
+        bsize      = self._buffer_size
+        # it's not pretty but it's simple -- we'll have to do a scan of the
+        # FAT to see in which cluster we have to land, and buffer that
+        # c_idx will be our cluster index
+        c_idx = offset // bsize
+        self._ccluster = record.cluster
+        ncluster = self._filesystem.fat1[self._ccluster]
+        while (ncluster >= 0x0ffffff0) and c_idx > 0:
+            self._ccluster = ncluster
+            c_idx -= 1
+            ncluster = self._filesystem.fat1[self._ccluster]
+        if c_idx == 0:  # we got to the last cluster
+            self._file_pos   = record.size
+            self._buffer_pos = record.size % bsize
+            return self._file_pos
+        self._buffer     = bytearray(filesystem._read_cluster(self._ccluster))
+        self._buffer_pos = offset % bsize
+        self._file_pos   = offset
         return self._file_pos
     
     def seekable(self):

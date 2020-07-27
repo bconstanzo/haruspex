@@ -2,7 +2,10 @@
 * Should be enough for a simple introduction to filesystems:
   * Parsing a partition table (MBR for now).
   * Parsing file records from a FAT32 filesystem.
-  + Parsing the FAT32 structures to read from the filesystem.
+  + Parsing the FAT32 structures to read from the filesystem:
+    * Reading the filesystem header and structures
+    + Reading files.
+    + Reading directories.
   + Have a comfortable API to use from a console.
 
 ## 0.1

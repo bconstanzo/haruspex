@@ -77,8 +77,16 @@ def read_time(bytes_, mili=0):
     # we know theres an issue in some Linux based systems that make
     # 0xffffffff datetimes for some FileRecords (that don't seem to belong to
     # the files, some kind of temporary record) so we must check a few things:
+    if year < 1980:
+        year = 1980
+    if year >= 2107:
+        year = 2107
+    if day < 1:
+        day = 1
     if month >= 12:
         month = 12
+    elif month < 1:
+        month = 1
     if hour >= 23:
         hour = 23
     if minute >= 59:

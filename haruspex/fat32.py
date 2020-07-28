@@ -31,7 +31,7 @@ FILENAME_CHARS = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()-@^_`{}~\xe5"
 REMAIN_ASCII = ALL_ASCII
 for idx, char in enumerate(FILENAME_CHARS):
     char = FILENAME_CHARS[idx:idx + 1]
-    REMAIN_ASCII.replace(char, b"")
+    REMAIN_ASCII = REMAIN_ASCII.replace(char, b"")
 FILENAME_TRANS = b"".maketrans(
     REMAIN_ASCII,
     b"\x00" * len(REMAIN_ASCII)
@@ -134,11 +134,11 @@ class FileRecord:
     @name.setter
     def name(self, value):
         if isinstance(value, str):
-            value = bytes(value, "utf-8")
+            value = bytes(value, "ascii")
         value = value.upper()  # not supporting long names for the moment
         name = value.translate(FILENAME_TRANS)
         name = name.replace(b"\x00", b"")
-        name = name[:8],   # byebye long names!
+        name = name[0:8]   # byebye long names!
         # let's check if there's an ext, for the lazy user
         if b"." in value:
             name, dot, ext = value.rpartition(b".")
@@ -162,12 +162,12 @@ class FileRecord:
     @ext.setter
     def ext(self, value):
         if isinstance(value, str):
-            value = bytes(value, "utf-8")
+            value = bytes(value, "ascii")
         value = value.upper()
         ext = value.translate(FILENAME_TRANS)
         ext = ext.replace(b"\x00", b"")
         ext = ext.rstrip()
-        ext = ext[:3]
+        ext = ext[0:3]
         self._ext = ext
     
     @property

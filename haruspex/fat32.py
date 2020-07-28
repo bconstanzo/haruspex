@@ -36,6 +36,9 @@ FILENAME_TRANS = b"".maketrans(
     REMAIN_ASCII,
     b"\x00" * len(REMAIN_ASCII)
 )
+# TODO: the whole PATH_SEP thing might need better thought, but for the moment
+#       simple should be enough
+PATH_SEP = "\\"
 
 
 def read_attributes(value):
@@ -391,6 +394,81 @@ class FileRecord:
         self.modified    = read_time(self._raw_data[22:26])
 
 
+
+class Directory:
+    """
+    Class to handle the abstraction for reading (eventually writing/modifying)
+    a directory/folder in a FAT32 filesystem. As with FileHande, this class is
+    strange, because it's more involved than you'd usually find, and has to
+    take care of some things which are usually responsibility of the OS.
+    """
+    def __init__(self, filesystem, record, *, parent=None, cluster=2):
+        self._filesystem = filesystem
+        if record is None:
+            record = FileRecord(bytes(32))
+            record.cluster = cluster
+        self._record = record
+        self.cluster = record.cluster
+        # a bit of a hack for the root cluster
+        self._parent     = parent
+        self.files       = []
+        if parent is None:
+            self.path = record.name.decode("ascii")
+        else:
+            self.path = parent.path + PATH_SEP + record.name.decode("ascii")
+        self._parse()
+    
+    def _parse(self):
+        """
+        Parses the directory cluster on disk, creating the FileRecords for every
+        entry in the directory (wink). For the moment long file names (LFNs) are
+        skipped since we don't want to tread into Microsoft patents territory.
+        Might think of supporting Linux-stlye LFNs.
+        """
+
+        def slicer(iterable):
+            """
+            Slices a bytes/bytearray object into 32-byte sized chunks for easier
+            parsing.
+            """
+            full_length = len(iterable)
+            part_length = (full_length // 32)
+            for i in range(part_length):
+                yield iterable[i * 32: i * 32 + 32]
+        
+        def lfn_filter(record):
+            """
+            Returns false for records which are LFN data.
+            """
+            attrs = record.attributes
+            lfn = (
+                attrs["read-only"] and
+                attrs["hidden"] and
+                attrs["system"] and
+                attrs["volume-id"]
+            )
+            return not(lfn)
+
+        filesystem   = self._filesystem
+        record       = self._record
+        raw_data     = []
+        cluster      = self.cluster
+        next_cluster = filesystem.fat1[cluster]
+        while next_cluster <= 0x0ffffff0:
+            raw_data.append(filesystem._read_cluster(cluster))
+            cluster = next_cluster
+            next_cluster = filesystem.fat1[cluster]
+        raw_data.append(filesystem._read_cluster(cluster))
+        raw_data  = b"".join(raw_data)
+        self.files = list(filter(
+            lfn_filter,
+            (
+                FileRecord(s)
+                for s in slicer(raw_data) 
+                if s != bytes(32)
+            )
+        ))
+
 class FileHandle:
     """
     Class to handle reading (and eventually writing) files in the FAT32
@@ -398,11 +476,14 @@ class FileHandle:
     object, because it actually deals with the filesystem on a level closer to
     the OS.
     """
-    def __init__(self, filesystem, record, mode):
+    def __init__(self, filesystem, record, mode, *, parent=None):
         self._filesystem = filesystem
         self._record     = record
         self._mode       = mode
-        self.path        = (record.name + b"." + record.ext).decode("ascii")
+        if parent is None:
+            self.path = (record.name + b"." + record.ext).decode("ascii")
+        else:
+            self.path = parent.path + PATH_SEP + (record.name + b"." + record.ext).decode("ascii")
         # this is all a lie (yet), we'll just open in "rb" mode
         # we will try to mimic the IOBase methods as close as possible, without
         # going crazy in it... right?

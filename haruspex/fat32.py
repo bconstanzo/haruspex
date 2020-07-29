@@ -351,13 +351,21 @@ class FileRecord:
     def __repr__(self):
         name = self.name.decode("ascii")
         ext  = self.ext.decode("ascii")
-        return f"< DirectoryEntry: {name}.{ext}>"
+        if self.attributes["directory"]:
+            showname = f"<DIR> {name}"
+        else:
+            showname = f"{name}.{ext}"
+        return f"< DirectoryEntry: {showname}>"
     
     def __str__(self):
         name = self.name.decode("ascii")
         ext  = self.ext.decode("ascii")
+        if self.attributes["directory"]:
+            showname = f"<DIR> {name}"
+        else:
+            showname = f"{name}.{ext}"
         return (
-               f"< DirectoryEntry: {name}.{ext}\n"
+               f"< DirectoryEntry: {showname}\n"
                f"    {'size':12}:{self.size:>12}\n" 
                f"    {'attributes':12}:{self._attrs2str():>12}\n" 
                f"    {'cluster':12}:{self.cluster:>12}\n" 

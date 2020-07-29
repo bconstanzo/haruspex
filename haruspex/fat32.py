@@ -638,6 +638,7 @@ class FAT32:
         self.number_of_fats      = nof
         self.sectors_per_fat     = spf
         self.root_cluster        = rc
+        self.root                = None  # we set its value later
         # and now some calculations...
         self.fat1_address = rs * bps
         self.fat2_address = (rs + spf) * bps
@@ -652,6 +653,7 @@ class FAT32:
         self.fat1 = []
         self.fat2 = []
         self._load_fats()
+        self._post_init()
     
     def __repr__(self):
         return f"< FAT32 @ {self._base_address} of {self.path}>"
@@ -706,3 +708,15 @@ class FAT32:
         length = nclusters * bps * spc
         self._handle.seek(pos)
         return self._handle.read(length)
+    
+    def _post_init(self):
+        """
+        Finishes setting up values in the filesystem. Everything that comes here
+        assumes the basic functionality of the filesystem is already working
+        and adds ease-of-use things.
+        """
+        root = Directory(self, None, cluster=self.root_cluster)
+        v_id = root.files[0]
+        if v_id.attributes["volume-id"]:
+            root.path = (v_id.name + v_id.ext).decode("ascii)")
+        self.root = root

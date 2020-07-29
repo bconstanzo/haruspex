@@ -145,7 +145,7 @@ class FileRecord:
     @name.setter
     def name(self, value):
         if isinstance(value, str):
-            value = bytes(value, "ascii")
+            value = bytes(value, "latin1")
         value = value.upper()  # not supporting long names for the moment
         name = value.translate(FILENAME_TRANS)
         name = name.replace(b"\x00", b"")
@@ -173,7 +173,7 @@ class FileRecord:
     @ext.setter
     def ext(self, value):
         if isinstance(value, str):
-            value = bytes(value, "ascii")
+            value = bytes(value, "latin1")
         value = value.upper()
         ext = value.translate(FILENAME_TRANS)
         ext = ext.replace(b"\x00", b"")
@@ -349,8 +349,8 @@ class FileRecord:
         self._modified = value
     
     def __repr__(self):
-        name = self.name.decode("ascii")
-        ext  = self.ext.decode("ascii")
+        name = self.name.decode("latin1")
+        ext  = self.ext.decode("latin1")
         if self.attributes["directory"]:
             showname = f"<DIR> {name}"
         else:
@@ -358,8 +358,8 @@ class FileRecord:
         return f"< DirectoryEntry: {showname}>"
     
     def __str__(self):
-        name = self.name.decode("ascii")
-        ext  = self.ext.decode("ascii")
+        name = self.name.decode("latin1")
+        ext  = self.ext.decode("latin1")
         if self.attributes["directory"]:
             showname = f"<DIR> {name}"
         else:
@@ -421,9 +421,9 @@ class Directory:
         self._parent     = parent
         self.files       = []
         if parent is None:
-            self.path = record.name.decode("ascii")
+            self.path = record.name.decode("latin1")
         else:
-            self.path = parent.path + PATH_SEP + record.name.decode("ascii")
+            self.path = parent.path + PATH_SEP + record.name.decode("latin1")
         self._parse()
     
     def _parse(self):
@@ -489,9 +489,9 @@ class FileHandle:
         self._record     = record
         self._mode       = mode
         if parent is None:
-            self.path = (record.name + b"." + record.ext).decode("ascii")
+            self.path = (record.name + b"." + record.ext).decode("latin1")
         else:
-            self.path = parent.path + PATH_SEP + (record.name + b"." + record.ext).decode("ascii")
+            self.path = parent.path + PATH_SEP + (record.name + b"." + record.ext).decode("latin1")
         # this is all a lie (yet), we'll just open in "rb" mode
         # we will try to mimic the IOBase methods as close as possible, without
         # going crazy in it... right?

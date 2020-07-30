@@ -340,6 +340,26 @@ class FileRecord:
         value = value.replace(second=second, microsecond=0)
         self._modified = value
     
+    @property
+    def deleted(self):
+        """
+        Boolean for the FileRecord being marked as deleted.
+
+        Setting this property to True (or True-like values) re-writes the first
+        character the FileRecord's name attribute. Setting it to false checks
+        for a \\xe5 value on the first byte, and if it finds it, replaces it for
+        and underscore.
+        """
+        return self._name[0:1] == b"\xe5"
+    
+    @deleted.setter
+    def deleted(self, value):
+        if value:
+            self._name = b"\xe5" + self._name[1:]
+        else:
+            if self._name[0:1] =) b"\xe5":
+                self._name = b"_" + self._name[1:]
+    
     def __repr__(self):
         name = self.name.decode("latin1")
         ext  = self.ext.decode("latin1")
@@ -364,6 +384,7 @@ class FileRecord:
                f"    {'created':12}: {self.created}\n" 
                f"    {'last_access':12}: {self.last_access}\n" 
                f"    {'modified':12}: {self.modified}\n" 
+               f"    {'deleted':12}:{self.deleted:>12}\n" 
                f">"
         )
     

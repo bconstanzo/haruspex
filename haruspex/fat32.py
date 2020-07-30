@@ -80,23 +80,15 @@ def read_time(bytes_, mili=0):
     # we know theres an issue in some Linux based systems that make
     # 0xffffffff datetimes for some FileRecords (that don't seem to belong to
     # the files, some kind of temporary record) so we must check a few things:
-    if year < 1980:
-        year = 1980
-    if year >= 2107:
-        year = 2107
-    if day < 1:
-        day = 1
-    if month >= 12:
-        month = 12
-    elif month < 1:
-        month = 1
-    if hour >= 23:
-        hour = 23
-    if minute >= 59:
-        minute = 59
-    if second >= 59:
-        second = 59
+    year   = max(1980,  min(2107, year))  # clips the values to within range
+    month  = max(1,     min(12,  month))
+    day    = max(1,     day)
+    hour   = min(23,   hour)
+    minute = min(59, minute)
+    second = min(59, second)
     # that gives a few sanity checks and should catch that particular issue
+    #     note: we're still not checking the day/month correctly, we should
+    #           be using the calendar module for that
     dt = datetime.datetime(year, month, day, hour, minute, second, micros)
     return dt
 

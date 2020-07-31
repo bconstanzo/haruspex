@@ -357,7 +357,7 @@ class FileRecord:
         if value:
             self._name = b"\xe5" + self._name[1:]
         else:
-            if self._name[0:1] =) b"\xe5":
+            if self._name[0:1] == b"\xe5":
                 self._name = b"_" + self._name[1:]
     
     def __repr__(self):

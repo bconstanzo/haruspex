@@ -76,7 +76,7 @@ def read_time(bytes_, mili=0):
     minute  = (raw_time & 0b0000011111100000) >> 5
     second  = (raw_time & 0b0000000000011111) * 2
     second += mili // 100
-    micros  = (mili % 100) * 1000
+    micros  = (mili % 100) * 10000
     # we know theres an issue in some Linux based systems that make
     # 0xffffffff datetimes for some FileRecords (that don't seem to belong to
     # the files, some kind of temporary record) so we must check a few things:

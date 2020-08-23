@@ -10,11 +10,14 @@ while data:
         break
     data = fd.read(512)
 record = haruspex.fat32.FileRecord(data[128:160])
-fh = haruspex.fat32.FileHandle(fs, record, "rb")
+dir_       = haruspex.fat32.Directory(fs, fs.root.files[3])
+fh_text    = haruspex.fat32.FileHandle(fs, record, "rb")
+fh_caracol = haruspex.fat32.FileHandle(fs, dir_.files[2], "rb")
 
 print(mbr)
 print(fs)
-print(fh)
+print(fh_text)
+print(fh_caracol)
 
 # What we tested of FileHandle:
 # * Reading a specific file.

@@ -439,6 +439,17 @@ class Directory:
             self.path = parent.path + PATH_SEP + record.name.decode("latin1")
         self._parse()
     
+    def __repr__(self):
+        return f"< Directory {self.path}>"
+    
+    def __str__(self):
+        ret =  f"< Directory {self.path}\n"
+        ret += "  Files: [\n    "
+        ret += "\n    ".join([repr(f) for f in self.files])
+        ret += "\n  ]"
+        ret += "\n>"
+        return ret
+    
     def _parse(self):
         """
         Parses the directory cluster on disk, creating the FileRecords for every

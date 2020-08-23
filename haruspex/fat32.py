@@ -610,11 +610,12 @@ class FileHandle:
         c_idx = offset // bsize
         self._ccluster = record.cluster
         ncluster = self._filesystem.fat1[self._ccluster]
-        while (ncluster >= 0x0ffffff0) and c_idx > 0:
+        while (ncluster < 0x0ffffff0) and c_idx > 0:
             self._ccluster = ncluster
             c_idx -= 1
             ncluster = self._filesystem.fat1[self._ccluster]
-        if c_idx == 0:  # we got to the last cluster
+        if c_idx >= 0 and (ncluster >= 0x0ffffff0):  # we got to the last cluster
+            self._buffer     = bytearray(filesystem._read_cluster(self._ccluster))
             self._file_pos   = record.size
             self._buffer_pos = record.size % bsize
             return self._file_pos

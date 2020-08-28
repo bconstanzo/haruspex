@@ -508,7 +508,7 @@ class FileHandle:
     object, because it actually deals with the filesystem on a level closer to
     the OS.
     """
-    def __init__(self, filesystem, record, mode, *, parent=None):
+    def __init__(self, filesystem, record, mode="rb", *, parent=None):
         self._filesystem = filesystem
         self._record     = record
         self._mode       = mode

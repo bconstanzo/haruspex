@@ -174,6 +174,20 @@ class FileRecord:
         self._ext = ext
     
     @property
+    def fullname(self):
+        """
+        Helper property, returns name for directories and name.ext for files.
+        Read only.
+        """
+        if self.attributes["directory"]:
+            return self.name
+        return self.name + b"." + self.ext
+    
+    @fullname.setter
+    def fullname(self, value):
+        pass
+    
+    @property
     def size(self):
         """
         The size of the File Record.

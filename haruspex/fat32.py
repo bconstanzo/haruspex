@@ -766,3 +766,39 @@ class FAT32:
         if v_id.attributes["volume-id"]:
             root.path = (v_id.name + v_id.ext).decode("ascii)")
         self.root = root
+    
+    def open(self, path):
+        """
+        Opens a file or directory found in the absolute path passed.
+
+        :param path: absolute path to open.
+        :returns: FileHandle or Directory object, depending on the path.
+        """
+        path  = path.upper()
+        path  = path.encode("latin-1")  # TODO: make the encoding an attribute...
+        path  = path.replace(b"\\", b"/")
+        parts = path.split(b"/")[1:]
+        # we ignore the first one, assuming it's the root -- remember, these
+        # should be absolute paths!
+        obj = self.root
+        for part in parts:
+            try:
+                files = obj.files
+            except AttributeError:
+                raise FileNotFoundError(f"{obj.path} is not a Directory!")
+            try:
+                idx = next( idx
+                            for idx, f in enumerate(files)
+                            if f.fullname == part
+                )
+            except StopIteration:
+                raise FileNotFoundError(f"No such file or directory {obj.path}\\{part}")
+            # if we're here, we got a a directory
+            record = obj.files[idx]
+            if record.attributes["directory"]:
+                obj = Directory(self, record, parent=obj)
+            else:
+                obj = FileHandle(self, record, parent=obj)
+                # hopefully this happens just once, otherwise 
+        # we could safely assume our object is just fine...
+        return obj

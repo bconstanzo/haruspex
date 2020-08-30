@@ -761,7 +761,7 @@ class FAT32:
         assumes the basic functionality of the filesystem is already working
         and adds ease-of-use things.
         """
-        root = Directory(self, None, cluster=self.root_cluster)
+        root = Directory(self, None)
         v_id = root.files[0]
         if v_id.attributes["volume-id"]:
             root.path = (v_id.name + v_id.ext).decode("ascii)")

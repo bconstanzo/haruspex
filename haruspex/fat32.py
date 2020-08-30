@@ -422,12 +422,19 @@ class Directory:
     a directory/folder in a FAT32 filesystem. As with FileHande, this class is
     strange, because it's more involved than you'd usually find, and has to
     take care of some things which are usually responsibility of the OS.
+
+    :param filesystem: the base filesystem (of class FAT32) to which the
+        Directory belongs
+    :param record: the FileRecord (Directory Entry) for the directory
+    :param parent: (Directory) parent of the (new) directory, used to build a
+        path string
+    :return: Directory object in `filesystem `for the given `record`
     """
-    def __init__(self, filesystem, record, *, parent=None, cluster=2):
+    def __init__(self, filesystem, record, *, parent=None):
         self._filesystem = filesystem
         if record is None:
             record = FileRecord(bytes(32))
-            record.cluster = cluster
+            record.cluster = filesystem.root_cluster
         self._record = record
         self.cluster = record.cluster
         # a bit of a hack for the root cluster

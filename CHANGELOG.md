@@ -5,9 +5,12 @@
   + Create a new FileRecord on disk/Directory.
   + Allocate and free clusters on the FATs
 
-## 0.2.2
+## 0.2.3
+* Adds fat32.FAT32.open() method.
+* Small fixes to prevent unexpected behavior.
 * Fixes a .seek() bug in FileHandle where it wasn't working for multi-clustered
-  files.
+  files (0.2.2).And then fixed it again, since it wasn't working for
+  single-clustered files (0.2.3).
 * 0.2.1 fixed a FAT32-timestamp reading bug.
 
 ## 0.2

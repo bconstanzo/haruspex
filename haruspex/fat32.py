@@ -398,7 +398,7 @@ class FileRecord:
                f"    {'created':12}: {self.created}\n" 
                f"    {'last_access':12}: {self.last_access}\n" 
                f"    {'modified':12}: {self.modified}\n" 
-               f"    {'deleted':12}:{self.deleted:>12}\n" 
+               f"    {'deleted':12}:{str(self.deleted):>12}\n" 
                f">"
         )
     

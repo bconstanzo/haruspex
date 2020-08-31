@@ -1,12 +1,13 @@
-## 0.3
+## 0.3 (WIP)
 + Write capabilities:
+  + Write/modify partition tables.
   + Dump a FileRecord to bytes.
   + Modify a Directory or FileHandle's associated record.
   + Create a new FileRecord on disk/Directory.
-  + Allocate and free clusters on the FATs
+  + Allocate and free clusters on the FATs.
 
 ## 0.2.3
-* Adds fat32.FAT32.open() method.
+* Added fat32.FAT32.open() method.
 * Small fixes to prevent unexpected behavior.
 * Fixes a .seek() bug in FileHandle where it wasn't working for multi-clustered
   files (0.2.2).And then fixed it again, since it wasn't working for

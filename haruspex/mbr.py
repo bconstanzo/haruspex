@@ -1,3 +1,8 @@
+"""
+Module to parse Master Boot Record partition tables and return a (reasonably)
+sane object.
+"""
+# TODO: add EBR support
 import struct
 
 
@@ -68,7 +73,7 @@ class Table:
         self._parse()
     
     def __repr__(self):
-        ret  = [f"< Partition Table @ {id(self)} >"]
+        ret  = [f"< MBR Partition Table @ {id(self)} >"]
         ret.extend(
                [f"    {p}" for p in self.partitions]
         )

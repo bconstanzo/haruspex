@@ -1,4 +1,5 @@
 from . import fat32
+from . import guid
 from . import mbr
 
 

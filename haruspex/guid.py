@@ -4,17 +4,7 @@ Defines class and functions to handle GUIDs.
 import struct
 
 
-# TODO: this actually _could_ go to a utils.py module, but so far it's only
-#       used here, and it'll stay here until it's necessary to move it around
-def str2bytes(data):
-    """
-    Converts a str with a bytes sequence into said sequence. If the given
-    sequence is not even-sized, the last character is ignored.
-
-    :param data: string with a byte-sequence in it (example: "ffd8")
-    :returns: bytes object of that sequence (example: b"\\xff\\xd8")
-    """
-    return bytes( int(a+b, base=16) for a, b in zip(data[::2], data[1::2]))
+from .utils import str2bytes
 
 
 class GUID:

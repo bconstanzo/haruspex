@@ -6,6 +6,9 @@ import struct
 import sys
 
 
+from .utils import slicer
+
+
 # TODO: read https://stackoverflow.com/questions/13775893/converting-struct-to-byte-and-back-to-struct
 #       and research a bit into this being a reasonable way to convert bytes
 #       into structs (and back).
@@ -476,16 +479,6 @@ class Directory:
         skipped since we don't want to tread into Microsoft patents territory.
         Might think of supporting Linux-stlye LFNs.
         """
-
-        def slicer(iterable):
-            """
-            Slices a bytes/bytearray object into 32-byte sized chunks for easier
-            parsing.
-            """
-            full_length = len(iterable)
-            part_length = (full_length // 32)
-            for i in range(part_length):
-                yield iterable[i * 32: i * 32 + 32]
         
         def lfn_filter(record):
             """
@@ -515,7 +508,7 @@ class Directory:
             lfn_filter,
             (
                 FileRecord(s)
-                for s in slicer(raw_data) 
+                for s in slicer(raw_data, 32)
                 if s != bytes(32)
             )
         ))

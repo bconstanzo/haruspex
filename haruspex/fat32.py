@@ -1,6 +1,7 @@
 """
 This module handles reading from and writing to a FAT32 filesystem.
 """
+import calendar
 import datetime
 import struct
 import sys
@@ -81,9 +82,10 @@ def read_time(bytes_, mili=0):
     # we know theres an issue in some Linux based systems that make
     # 0xffffffff datetimes for some FileRecords (that don't seem to belong to
     # the files, some kind of temporary record) so we must check a few things:
-    year   = max(1980,  min(2107, year))  # clips the values to within range
-    month  = max(1,     min(12,  month))
-    day    = max(1,     day)
+    year   = max(1980,  min(2107,    year))  # clips the values to within range
+    month  = max(1,     min(12,     month))
+    _weeks, max_days = calendar.monthrange(year, month)
+    day    = max(1,     min(max_days, day))
     hour   = min(23,   hour)
     minute = min(59, minute)
     second = min(59, second)

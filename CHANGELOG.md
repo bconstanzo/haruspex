@@ -1,4 +1,4 @@
-## 0.3 (WIP)
+## 0.4 (WIP)
 + Write capabilities:
   + Write/modify partition tables.
   + Dump a FileRecord to bytes.
@@ -6,11 +6,16 @@
   + Create a new FileRecord on disk/Directory.
   + Allocate and free clusters on the FATs.
 
-## 0.2.3
-* Added fat32.FAT32.open() method.
+## 0.3
+
+AKA "just this one extra little thing".
+
+* Added GPT parsing.
+* Added utils module for general classes/functions.
+* Added fat32.FAT32.open() method. (0.2.3)
 * Small fixes to prevent unexpected behavior.
 * Fixes a .seek() bug in FileHandle where it wasn't working for multi-clustered
-  files (0.2.2).And then fixed it again, since it wasn't working for
+  files (0.2.2). And then fixed it again, since it wasn't working for
   single-clustered files (0.2.3).
 * 0.2.1 fixed a FAT32-timestamp reading bug.
 

@@ -19,4 +19,3 @@ def str2bytes(data):
     :returns: bytes object of that sequence (example: b"\\xff\\xd8")
     """
     return bytes.fromhex(data)
-    return bytes( int(a+b, base=16) for a, b in zip(data[::2], data[1::2]))

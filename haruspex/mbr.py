@@ -36,8 +36,8 @@ class Partition:
         self._parse()
     
     def __repr__(self):
-        ret = "< Partition - {type} - boot: {bootable} @ {lba_start} of {size} >"
-        return ret.format_map(self.__dict__)
+        ret = f"< Partition - {self.type} - boot: {self.bootable} @ {self.start} of {self.size} >"
+        return ret
     
     def _parse(self):
         """

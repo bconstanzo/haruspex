@@ -35,6 +35,32 @@ class Partition:
         # after setting the attributes for the instance, we parse the raw data
         self._parse()
     
+    def __bytes__(self):
+        """
+        Handles packing the partitions attributes into the binary struct that
+        is saved to disk.
+        """
+        def _chs(cylinder, head, sector):
+            sector   = ((cylinder & 0b1100000000) >> 2) | (sector & 0b00111111)
+            cylinder =   cylinder & 0b0011111111
+            # just in case, let's clip the values
+            cylinder = min(max(0, cylinder), 255)
+            head     = min(max(0, head), 255)
+            sector   = min(max(0, sector), 255)
+            return (cylinder, head, sector)
+        
+        start_c, start_h, start_s = _chs(*self._chs_start)
+        end_c  , end_h,   end_s   = _chs(*self._chs_end)
+        return struct.pack(
+            "<BBBBBBBBII",
+            self._bootable,
+            start_h, start_s, start_c,
+            self._type,
+            end_h, end_s, end_c,
+            self._start,
+            self._size
+        )
+    
     def __repr__(self):
         ret = f"< Partition - {self.type} - boot: {self.bootable} @ {self.start} of {self.size} >"
         return ret
@@ -143,6 +169,9 @@ class Partition:
     def size(self, value):
         value = min(max(0, value), 0xffffffff)
         self._size = value
+    
+    def to_bytes(self):
+        return bytes(self)
 
 
 class Table:

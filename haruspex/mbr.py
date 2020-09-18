@@ -129,7 +129,7 @@ class Partition:
     @type.setter
     def type(self, value):
         value = min(max(0, value), 255)  # clip it to 0..255
-        self._type = type
+        self._type = value
     
     @property
     def chs_end(self):

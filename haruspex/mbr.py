@@ -26,12 +26,12 @@ class Partition:
         :param data: raw bytes for the MBR record, at least 16 bytes long
         """
         self._raw_data = data
-        self.bootable  = False
-        self.chs_start = (0x0, 0x0, 0x0)
-        self.type      = 0x0
-        self.chs_end   = (0x0, 0x0, 0x0)
-        self.lba_start = 0x0
-        self.size      = 0
+        self._bootable  = 0x0
+        self._chs_start = (0x0, 0x0, 0x0)
+        self._type      = 0x0
+        self._chs_end   = (0x0, 0x0, 0x0)
+        self._start     = 0x0
+        self._size      = 0
         # after setting the attributes for the instance, we parse the raw data
         self._parse()
     
@@ -51,13 +51,98 @@ class Partition:
             return (cylinder, head, sector)
 
         data = self._raw_data
-        self.bootable   = data[0] == 0x80
+        self._bootable  = data[0]
         # CHS addresses should be 0 in any recent MBR, stil...
-        self.chs_start  = _chs(data[1:4])
-        self.type       = self.partition_types.get(data[4], "Unknown")
-        self.chs_end    = _chs(data[5:8])
-        self.lba_start, = struct.unpack("<I", data[8:12])
-        self.size,      = struct.unpack("<I", data[12:16])
+        self._chs_start = _chs(data[1:4])
+        self._type      = data[4]
+        self._chs_end   = _chs(data[5:8])
+        self._start,    = struct.unpack("<I", data[8:12])
+        self._size,     = struct.unpack("<I", data[12:16])
+    
+    @property
+    def bootable(self):
+        """
+        Bootable flag for the partition.
+
+        When setting this property, the boolean value (or expression) passed is
+        used to determine the correct bytes to store on disk.
+        """
+        return self._bootable == 0x80
+    
+    @bootable.setter
+    def bootable(self, value):
+        if value:
+            self._bootable = 0x80
+        else:
+            self.bootable = 0x0
+    
+    @property
+    def chs_start(self):
+        """
+        Cylinder-Head-Sector start address. Parsed at initialization time.
+
+        Read only.
+        """
+        return self._chs_start
+    
+    @chs_start.setter
+    def chs_start(self, value):
+        pass
+    
+    @property
+    def type(self):
+        """
+        Partition type. The getter returns a string coded in the
+        Partition.partition_types dict. Partition._type holds the underlying int
+        value.
+
+        The setter clips any integer value given to the 0..255 range.
+        """
+        return self.partition_types.get(self._type, "Unknown")
+    
+    @type.setter
+    def type(self, value):
+        value = min(max(0, value), 255)  # clip it to 0..255
+        self._type = type
+    
+    @property
+    def chs_end(self):
+        """
+        Cylinder-Head-Sector end address. Parsed at initialization time.
+
+        Read only.
+        """
+        return self._chs_end
+    
+    @chs_end.setter
+    def chs_start(self, value):
+        pass
+
+    @property
+    def start(self):
+        """
+        LBA start address. Parsed at initialization time. The setter enforces a
+        0x0..0xffffffff range.
+        """
+        return self._start
+    
+    @start.setter
+    def start(self, value):
+        value = min(max(0, value), 0xffffffff)
+        self._start = value
+    
+    @property
+    def size(self):
+        """
+        Parition size. Parsed at initialization time. The setter enforces a
+        0x0..0xffffffff range.
+        """
+        return self._size
+    
+    @size.setter
+    def size(self, value):
+        value = min(max(0, value), 0xffffffff)
+        self._size = value
 
 
 class Table:

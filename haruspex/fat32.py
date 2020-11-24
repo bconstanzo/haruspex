@@ -757,7 +757,7 @@ class FAT32:
         root = Directory(self, None)
         v_id = root.files[0]
         if v_id.attributes["volume-id"]:
-            root.path = (v_id.name + v_id.ext).decode("ascii)")
+            root.path = (v_id.name + v_id.ext).decode("ascii")
         self.root = root
     
     def open(self, path):

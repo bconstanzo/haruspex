@@ -186,6 +186,7 @@ class Table:
         :param data: raw bytes read from an MBR (at least 512 bytes long)
         """
         self._raw_data = data
+        self.boot_code = b""
         self.partitions = []
         self._parse()
     
@@ -202,6 +203,7 @@ class Table:
         changes the self.partitions list.
         """
         data = self._raw_data[446:]
+        self.boot_code = self._raw_data[:446]
         p_parts = filter(
             lambda x: x != b"\x00" * 16,  # filter out empty partitions
             (data[i * 16: i * 16 + 16] for i in range(4))

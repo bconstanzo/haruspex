@@ -128,6 +128,7 @@ class Partition:
     
     @type.setter
     def type(self, value):
+        value = int(value)
         value = min(max(0, value), 255)  # clip it to 0..255
         self._type = value
     
@@ -154,6 +155,7 @@ class Partition:
     
     @start.setter
     def start(self, value):
+        value = int(value)
         value = min(max(0, value), 0xffffffff)
         self._start = value
     
@@ -167,6 +169,7 @@ class Partition:
     
     @size.setter
     def size(self, value):
+        value = int(value)
         value = min(max(0, value), 0xffffffff)
         self._size = value
     

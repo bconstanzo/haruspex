@@ -25,6 +25,15 @@ class GUID:
         self.gp1, self.gp2, self.gp3 = gp1, gp2, gp3
         self.gp4, self.gp5           = gp4, gp5
         self._repr_str  = f"{gp1:08x}-{gp2:04x}-{gp3:04x}-{gp4:04x}-{gp5:012x}".upper()
+        self._mixed_endian = mixed_endian
+
+    def __bytes__(self):
+        if self._mixed_endian:
+            data = struct.pack("<LHH", self.gp1, self.gp2, self.gp3)
+        else:
+            data = struct.pack(">LHH", self.gp1, self.gp2, self.gp3)
+        data += struct.pack(">HHL", self.gp4, self.gp5, self.gp6)
+        return data
 
     def __repr__(self):
         return f"< GUID: {self._repr_str} >"

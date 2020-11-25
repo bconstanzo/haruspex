@@ -189,6 +189,18 @@ class Table:
         self.boot_code = b""
         self.partitions = []
         self._parse()
+
+    def __bytes__(self):
+        ret = bytearray(512)
+        ret[:446] = self.boot_code
+        parts = b""
+        for p in self.partitions:
+            parts += bytes(p)
+        parts = parts[:64]
+        psize = len(parts)
+        ret[446: 446 + psize] = parts
+        ret[510: 512] = b"\x55\xaa"
+        return bytes(ret)
     
     def __repr__(self):
         ret  = [f"< MBR Partition Table @ {id(self)} >"]
@@ -213,3 +225,5 @@ class Table:
         # -- the legacy files have a larger implementation that includes
         #    extended partitions parsing
 
+    def to_bytes(self):
+        return bytes(self)

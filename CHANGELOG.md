@@ -6,10 +6,11 @@
   + Create a new FileRecord on disk/Directory.
   + Allocate and free clusters on the FATs.
 
-## 0.3
+## 0.3.1
 
 AKA "just this one extra little thing".
 
+* Added (basic) VHD support (0.3.1)
 * Added GPT parsing.
 * Added utils module for general classes/functions.
 * Added fat32.FAT32.open() method. (0.2.3)

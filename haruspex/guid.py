@@ -32,7 +32,9 @@ class GUID:
             data = struct.pack("<LHH", self.gp1, self.gp2, self.gp3)
         else:
             data = struct.pack(">LHH", self.gp1, self.gp2, self.gp3)
-        data += struct.pack(">HHL", self.gp4, self.gp5, self.gp6)
+        gp5 = self.gp5 >> 32
+        gp6 = self.gp5 & 0x0000ffffffff
+        data += struct.pack(">HHL", self.gp4, gp5, gp6)
         return data
 
     def __repr__(self):

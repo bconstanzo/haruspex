@@ -62,6 +62,40 @@ class VHDFooter:
         self._checksum          = csum
         self._identifier        = GUID(guid)
         self._saved_state       = stat
+    
+    def __bytes__(self):
+        data = bytearray()
+        # a few of the properties need some preprocessing before being packed
+        # as bytes
+        modtime = self._modification_time - datetime.datetime(2000, 1, 1)
+        modtime = (modtime.days * 86400) + modtime.seconds
+        cver_major, cver_minor = self._creator_version
+        cver = (cver_major << 16) | cver_minor
+        cyl, head, sec = self._disk_geometry
+        dgeo = struct.pack(">HBB", cyl, head, sec)
+        # ok, now we're ready to pack!
+        data += struct.pack(
+            ">8sLLqL4sL4sQQ4sLl16sB",
+            self._cookie,
+            self._features,
+            self._format_version,
+            self._next_offset,  
+            modtime,
+            self._creator_app,
+            cver,
+            self._creator_host, 
+            self._disk_size,    
+            self._data_size,       
+            dgeo,
+            self._disk_type,   
+            0,                     # checksum, we calculate it on the spot
+            bytes(self._identifier),
+            self._saved_state
+        )
+        checksum = ~sum(data)
+        data[64:68] = struct.pack(">l", checksum)
+        data += bytes(427)
+        return bytes(data)
 
     @property
     def cookie(self):

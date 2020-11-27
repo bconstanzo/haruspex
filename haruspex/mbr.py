@@ -21,7 +21,10 @@ class Partition:
         0x0f: "Microsoft Extended LBA",
     }   # this dict could be extended to include more types
 
-    def __init__(self, data):
+    def __init__(self, data=bytes(16), *, 
+                 bootable=None, chs_start=None, type=None, chs_end=None,
+                 start=None, size=None
+        ):
         """
         :param data: raw bytes for the MBR record, at least 16 bytes long
         """
@@ -34,6 +37,19 @@ class Partition:
         self._size      = 0
         # after setting the attributes for the instance, we parse the raw data
         self._parse()
+        # and then we override those values with the keyword-only parameters
+        if bootable is not None:
+            self.bootable = bootable
+        if chs_start is not None:
+            self.chs_start = chs_start
+        if type is not None:
+            self.type = type
+        if chs_end is not None:
+            self.chs_end = chs_end
+        if start is not None:
+            self.start = start
+        if size is not None:
+            self.size = size
     
     def __bytes__(self):
         """

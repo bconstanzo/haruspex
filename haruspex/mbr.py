@@ -197,7 +197,9 @@ class Table:
     """
     Handles one Master Boot Record (simple case without Extended Partitions).
     """
-    def __init__(self, data):
+    def __init__(self, data=bytes(512), *,
+                 boot_code=None, partitions=None
+        ):
         """
         :param data: raw bytes read from an MBR (at least 512 bytes long)
         """
@@ -205,6 +207,11 @@ class Table:
         self.boot_code = b""
         self.partitions = []
         self._parse()
+        # override parsed values with keyword-only arguments
+        if boot_code is not None:
+            self.boot_code = boot_code
+        if partitions is not None:
+            self.partitions = partitions
 
     def __bytes__(self):
         ret = bytearray(512)

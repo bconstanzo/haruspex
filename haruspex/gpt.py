@@ -21,7 +21,10 @@ class Partition:
         GUID("EBD0A0A2-B9E5-4433-87C0-68B6B72699C7"): "Basic Data Partition",
     }
 
-    def __init__(self, data, length):
+    def __init__(self, data=bytes(128), length=128, *,
+                 guid_type=None, guid_part=None, start=None, end=None,
+                 size=None, flags=None, name=None
+        ):
         """
         :param data: raw bytes of the partition record
         :param length: length in bytes of the partition record, defaults to 128
@@ -38,6 +41,21 @@ class Partition:
         self.size      = 0  # we define it for ease of use
         self._length   = length
         self._parse()
+        # and now we override the parsed values with passed keyword only args
+        if guid_type is not None:
+            self.guid_type = guid_type
+        if guid_part is not None:
+            self.guid_part = guid_part
+        if start is not None:
+            self.start = start
+        if end is not None:
+            self.end = end
+        if size is not None:
+            self.size = size
+        if flags is not None:
+            self.flags = flags
+        if name is not None:
+            self.name = name
     
     def __repr__(self):
         ret = "< Partition - {type} - @ {start} of {size} >"

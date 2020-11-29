@@ -29,7 +29,13 @@ class VHDFooter:
         6: "Reserved (deprecated) #6",
     }
 
-    def __init__(self, data):
+    def __init__(self, data, *, 
+                 cookie=None, features=None, format_version=None, next_offset=None,
+                 modification_time=None, creator_app=None, creator_version=None,
+                 creator_host=None, disk_size=None, data_size=None,
+                 disk_geometry=None, disk_type=None, checksum=None,
+                 identifier=None, saved_state=None
+        ):
         """
         :param data: the 512 bytes that make the VHD Fixed Footer
         """
@@ -62,6 +68,37 @@ class VHDFooter:
         self._checksum          = csum
         self._identifier        = GUID(guid)
         self._saved_state       = stat
+        # and now we apply the keyword-only overrides:
+        if cookie is not None:
+            self.cookie = cookie
+        if features is not None:
+            self.features = features
+        if format_version is not None:
+            self.format_version = format_version
+        if next_offset is not None:
+            self.next_offset = next_offset
+        if modification_time is not None:
+            self.modification_time = modification_time
+        if creator_app is not None:
+            self.creator_app = creator_app
+        if creator_version is not None:
+            self.creator_version = creator_version
+        if creator_host is not None:
+            self.creator_host = creator_host
+        if disk_size is not None:
+            self.disk_size = disk_size
+        if data_size is not None:
+            self.data_size = data_size
+        if disk_geometry is not None:
+            self.disk_geometry = disk_geometry
+        if disk_type is not None:
+            self.disk_type = disk_type
+        if checksum is not None:  # this one is a pass, it's done for consistency
+            self.checksum = checksum
+        if identifier is not None:
+            self.identifier = identifier
+        if saved_state is not None:
+            self.saved_state = saved_state
     
     def __bytes__(self):
         data = bytearray()

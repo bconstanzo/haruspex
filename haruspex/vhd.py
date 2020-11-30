@@ -104,30 +104,30 @@ class VHDFooter:
         data = bytearray()
         # a few of the properties need some preprocessing before being packed
         # as bytes
-        modtime = self._modification_time - datetime.datetime(2000, 1, 1)
+        modtime = self.modification_time - datetime.datetime(2000, 1, 1)
         modtime = (modtime.days * 86400) + modtime.seconds
-        cver_major, cver_minor = self._creator_version
+        cver_major, cver_minor = self.creator_version
         cver = (cver_major << 16) | cver_minor
-        cyl, head, sec = self._disk_geometry
+        cyl, head, sec = self.disk_geometry
         dgeo = struct.pack(">HBB", cyl, head, sec)
         # ok, now we're ready to pack!
         data += struct.pack(
             ">8sLLqL4sL4sQQ4sLl16sB",
-            self._cookie,
-            self._features,
-            self._format_version,
-            self._next_offset,  
+            self.cookie,
+            self.features,
+            self.format_version,
+            self.next_offset,  
             modtime,
-            self._creator_app,
+            self.creator_app,
             cver,
-            self._creator_host, 
-            self._disk_size,    
-            self._data_size,       
+            self.creator_host, 
+            self.disk_size,    
+            self.data_size,       
             dgeo,
             self._disk_type,   
             0,                     # checksum, we calculate it on the spot
-            bytes(self._identifier),
-            self._saved_state
+            bytes(self.identifier),
+            self.saved_state
         )
         checksum = ~sum(data)
         data[64:68] = struct.pack(">l", checksum)
@@ -141,7 +141,10 @@ class VHDFooter:
     
     @cookie.setter
     def cookie(self, value):
-        pass
+        value = bytes(value)[:8]
+        if len(value) != 8:
+            value += bytes(8 - len(value))
+        self._cookie = value
 
     @property
     def features(self):
@@ -150,11 +153,14 @@ class VHDFooter:
     
     @features.setter
     def features(self, value):
-        pass
+        value = int(value)
+        value = max(min(value, 0xffffffff), 0)
+        self._features = value
 
     @property
     def format_version(self):
         """Format version. Read only, fixed as 0x00010000."""
+        self._format_version = 0x00010000
         return self._format_version
     
     @format_version.setter
@@ -164,6 +170,7 @@ class VHDFooter:
     @property
     def next_offset(self):
         """Next offset. Read only, fixed as -1."""
+        self._next_offset = -1
         return self._next_offset
     
     @next_offset.setter

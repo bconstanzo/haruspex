@@ -29,7 +29,7 @@ class VHDFooter:
         6: "Reserved (deprecated) #6",
     }
 
-    def __init__(self, data, *, 
+    def __init__(self, data=bytes(512), *, 
                  cookie=None, features=None, format_version=None, next_offset=None,
                  modification_time=None, creator_app=None, creator_version=None,
                  creator_host=None, disk_size=None, data_size=None,

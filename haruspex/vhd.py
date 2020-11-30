@@ -286,7 +286,7 @@ class VHDFooter:
     @disk_type.setter
     def disk_type(self, value):
         value = int(value)
-        if 0 <= value <= 6:
+        if not(0 <= value <= 6):
             raise ValueError("the given value is not in the 0..6 range")
         self._disk_type = value
     

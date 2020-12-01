@@ -269,13 +269,13 @@ class VHDFooter:
     @property
     def checksum(self):
         """
-        Checksum. Read-only, gets recalculated on conversion of footer to bytes.
+        Checksum. Gets recalculated on conversion of footer to bytes.
         """
         return self._checksum
 
     @checksum.setter
     def checksum(self, value):
-        pass
+        self._checksum = value
 
     @property
     def identifier(self):

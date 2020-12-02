@@ -9,18 +9,18 @@ from .utils import str2bytes
 
 class GUID:
     """GUID class"""
-    def __init__(self, raw_data, *, mixed_endian=False):
-        if isinstance(raw_data, str):
-            raw_data = raw_data.replace("{", "")
-            raw_data = raw_data.replace("}", "")
-            raw_data = raw_data.replace("-", "")
-            raw_data = str2bytes(raw_data)
-        self._raw_data = raw_data
+    def __init__(self, data, *, mixed_endian=False):
+        if isinstance(data, str):
+            data = data.replace("{", "")
+            data = data.replace("}", "")
+            data = data.replace("-", "")
+            data = str2bytes(data)
+        self._data = data
         if mixed_endian:
-            gp1, gp2, gp3 = struct.unpack("<LHH", raw_data[0: 8])
+            gp1, gp2, gp3 = struct.unpack("<LHH", data[0: 8])
         else:
-            gp1, gp2, gp3 = struct.unpack(">LHH", raw_data[0: 8])
-        gp4, gp5, gp6 = struct.unpack(">HHL", raw_data[8:16])
+            gp1, gp2, gp3 = struct.unpack(">LHH", data[0: 8])
+        gp4, gp5, gp6 = struct.unpack(">HHL", data[8:16])
         gp5 = (gp5 << 32 ) | gp6
         self.gp1, self.gp2, self.gp3 = gp1, gp2, gp3
         self.gp4, self.gp5           = gp4, gp5

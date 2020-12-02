@@ -183,14 +183,19 @@ class Table:
         :param data: raw bytes read from an MBR (at least 512 bytes long)
         """
         self._raw_data = data
-        self.boot_code = b""
-        self.partitions = []
-        self._parse()
+        data = data[446:]
+        p_boot_code = self._raw_data[:446]
+        p_parts = filter(
+            lambda x: x != b"\x00" * 16,  # filter out empty partitions
+            (data[i * 16: i * 16 + 16] for i in range(4))
+        )
+        p_partitions = [Partition(p) for p in p_parts]
+        # this implementation is "good enough", but not thorough
+        # -- the legacy files have a larger implementation that includes
+        #    extended partitions parsing
         # override parsed values with keyword-only arguments
-        if boot_code is not None:
-            self.boot_code = boot_code
-        if partitions is not None:
-            self.partitions = partitions
+        self.boot_code = boot_code or p_boot_code
+        self.partitions = partitions or p_partitions
 
     def __bytes__(self):
         ret = bytearray(512)
@@ -210,22 +215,6 @@ class Table:
                [f"    {p}" for p in self.partitions]
         )
         return "\n".join(ret)
-    
-    def _parse(self):
-        """
-        Parses the raw data passed during initialization. Does not return, but
-        changes the self.partitions list.
-        """
-        data = self._raw_data[446:]
-        self.boot_code = self._raw_data[:446]
-        p_parts = filter(
-            lambda x: x != b"\x00" * 16,  # filter out empty partitions
-            (data[i * 16: i * 16 + 16] for i in range(4))
-        )
-        self.partitions = [Partition(p) for p in p_parts]
-        # this implementation is "good enough", but not thorough
-        # -- the legacy files have a larger implementation that includes
-        #    extended partitions parsing
 
     def to_bytes(self):
         return bytes(self)

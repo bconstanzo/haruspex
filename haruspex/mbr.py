@@ -28,28 +28,27 @@ class Partition:
         """
         :param data: raw bytes for the MBR record, at least 16 bytes long
         """
+        def _chs(value):
+            """A little helper for CHS parsing."""
+            head, sector, cylinder = struct.unpack("<3B", value)
+            cylinder = ((sector & 0b11000000) << 2) | cylinder
+            sector   =   sector & 0b00111111
+            return (cylinder, head, sector)
+
+        p_bootable  = data[0]
+        p_chs_start = _chs(data[1:4])
+        p_type      = data[4]
+        p_chs_end   = _chs(data[5:8])
+        p_start,    = struct.unpack("<I", data[8:12])
+        p_size,     = struct.unpack("<I", data[12:16])
+        # and now we set, either the overridden values or the parsed ones
         self._raw_data = data
-        self._bootable  = 0x0
-        self._chs_start = (0x0, 0x0, 0x0)
-        self._type      = 0x0
-        self._chs_end   = (0x0, 0x0, 0x0)
-        self._start     = 0x0
-        self._size      = 0
-        # after setting the attributes for the instance, we parse the raw data
-        self._parse()
-        # and then we override those values with the keyword-only parameters
-        if bootable is not None:
-            self.bootable = bootable
-        if chs_start is not None:
-            self.chs_start = chs_start
-        if type is not None:
-            self.type = type
-        if chs_end is not None:
-            self.chs_end = chs_end
-        if start is not None:
-            self.start = start
-        if size is not None:
-            self.size = size
+        self.bootable  = bootable or p_bootable
+        self.chs_start = chs_start or p_chs_start
+        self.type      = type or p_type
+        self.chs_end   = chs_end or p_chs_end
+        self.start     = start or p_start
+        self.size      = size or p_size
     
     def __bytes__(self):
         """
@@ -81,26 +80,6 @@ class Partition:
         ret = f"< Partition - {self.type} - boot: {self.bootable} @ {self.start} of {self.size} >"
         return ret
     
-    def _parse(self):
-        """
-        Parses self._raw_data and uses it to modifiy/complete the internal state
-        of Record.
-        """
-        def _chs(value):
-            head, sector, cylinder = struct.unpack("<3B", value)
-            cylinder = ((sector & 0b11000000) << 2) | cylinder
-            sector   =   sector & 0b00111111
-            return (cylinder, head, sector)
-
-        data = self._raw_data
-        self._bootable  = data[0]
-        # CHS addresses should be 0 in any recent MBR, stil...
-        self._chs_start = _chs(data[1:4])
-        self._type      = data[4]
-        self._chs_end   = _chs(data[5:8])
-        self._start,    = struct.unpack("<I", data[8:12])
-        self._size,     = struct.unpack("<I", data[12:16])
-    
     @property
     def bootable(self):
         """
@@ -116,7 +95,7 @@ class Partition:
         if value:
             self._bootable = 0x80
         else:
-            self.bootable = 0x0
+            self._bootable = 0x0
     
     @property
     def chs_start(self):
@@ -129,7 +108,7 @@ class Partition:
     
     @chs_start.setter
     def chs_start(self, value):
-        pass
+        self._chs_start = value
     
     @property
     def type(self):
@@ -158,8 +137,8 @@ class Partition:
         return self._chs_end
     
     @chs_end.setter
-    def chs_start(self, value):
-        pass
+    def chs_end(self, value):
+        self._chs_end = value
 
     @property
     def start(self):

@@ -30,52 +30,29 @@ class Partition:
         :param length: length in bytes of the partition record, defaults to 128
         """
         self._raw_data = data
-        self.guid_type = GUID(bytes(16), mixed_endian=True)
-        self.guid_part = GUID(bytes(16), mixed_endian=True)
-        self.type      = ""
-        self.start     = 0
-        self.end       = 0
-        self.flags     = 0
-        self.name      = ""
-        # now for something extra (and not completely different)
-        self.size      = 0  # we define it for ease of use
         self._length   = length
-        self._parse()
-        # and now we override the parsed values with passed keyword only args
-        if guid_type is not None:
-            self.guid_type = guid_type
-        if guid_part is not None:
-            self.guid_part = guid_part
-        if start is not None:
-            self.start = start
-        if end is not None:
-            self.end = end
-        if size is not None:
-            self.size = size
-        if flags is not None:
-            self.flags = flags
-        if name is not None:
-            self.name = name
+        # now for something extra (and not completely different)
+        data   = self._raw_data
+        nlength = self._length - 56  # this is the length of the name field
+        p_guid_type = GUID(data[ 0:16], mixed_endian=True)
+        p_guid_part = GUID(data[16:32], mixed_endian=True)
+        p_start, p_end, p_flags = struct.unpack("<QQQ", data[32:56])
+        p_name, = struct.unpack(f"{nlength}s", data[56:])
+        p_name  = p_name.decode("utf-16")
+        if "\x00" in p_name:
+            p_name = p_name[:p_name.find("\x00")]
+        # and now we set the values, parsed or given
+        self.guid_type = guid_type or p_guid_type
+        self.guid_part = guid_part or p_guid_part
+        self.type      = self.partition_types.get(self.guid_type, "Unknown")  # make property
+        self.start     = start or p_start
+        self.end       = end or p_end
+        self.size      = self.end - self.start + 1
+        self.name      = name or p_name
     
     def __repr__(self):
         ret = "< Partition - {type} - @ {start} of {size} >"
         return ret.format_map(self.__dict__)
-    
-    def _parse(self):
-        data   = self._raw_data
-        length = self._length - 56  # this is the length of the name field
-        start, end, flags = struct.unpack("<QQQ", data[32:56])
-        name, = struct.unpack(f"{length}s", data[56:])
-        name  = name.decode("utf-16")
-        if "\x00" in name:
-            name = name[:name.find("\x00")]
-        self.guid_type = GUID(data[ 0:16], mixed_endian=True)
-        self.guid_part = GUID(data[16:32], mixed_endian=True)
-        self.type      = self.partition_types.get(self.guid_type, "Unknown")
-        self.start     = start
-        self.end       = end
-        self.size      = end - start + 1
-        self.name      = name
 
 
 class Table:

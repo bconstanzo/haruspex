@@ -3,6 +3,9 @@ Module to parse Master Boot Record partition tables and return a (reasonably)
 sane object.
 """
 # TODO: add EBR support
+# TODO: add comparisson operators for the classes?
+#       this just came up after a small refactoring, and it'd be a simpler way
+#       to test things
 import struct
 
 
@@ -200,9 +203,7 @@ class Table:
     def __bytes__(self):
         ret = bytearray(512)
         ret[:446] = self.boot_code
-        parts = b""
-        for p in self.partitions:
-            parts += bytes(p)
+        parts = b"".join(bytes(p) for p in self.partitions)
         parts = parts[:64]
         psize = len(parts)
         ret[446: 446 + psize] = parts

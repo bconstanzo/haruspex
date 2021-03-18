@@ -229,14 +229,13 @@ class FileRecord:
         The flags of the File Record. Read only.
 
         This is actually a reserved field, which non-Microsoft implementations
-        use for different purposes. Other than read it, we don't do anything
-        with it.
+        use for different purposes.
         """
         return self._flags
     
     @flags.setter
     def flags(self, value):
-        pass  # let's keep this read-only for the moment
+        self._flags = value  # we're gonna need this for the optional arguments
 
     @property
     def cluster(self):

@@ -57,26 +57,40 @@ class Partition:
 
 class Table:
     """GPT Partition Table"""
-    def __init__(self, raw_data):
+    def __init__(self, raw_data, *,
+                 signature=None, revision=None, header_size=None,
+                 current_lba=None, backup_lba=None, first_lba=None,
+                 last_lba=None, disk_guid=None, parts_lba=None, parts_num=None,
+                 parts_size=None, crc32_parts=None, partitions=None
+        ):
+        """
+
+        """
         self._raw_data = raw_data
-        rev, hsize, crc32, _res, cur_lba, back_lba, first_lba, last_lba \
+        p_rev, p_hsize, p_crc32, _res, p_cur_lba, p_back_lba, p_first_lba, p_last_lba \
             = struct.unpack("<LLLLQQQQ", raw_data[8:56])
         # disk GUID comes in the middle here...
-        parts_lba, parts_num, parts_size, crc32_parts = struct.unpack("<QLLL", raw_data[72:92])
-        self.signature   = raw_data[0:8]
-        self.revision    = rev
-        self.header_size = hsize
-        self.current_lba = cur_lba
-        self.backup_lba  = back_lba
-        self.first_lba   = first_lba
-        self.last_lba    = last_lba
-        self.disk_guid   = GUID(raw_data[56:72], mixed_endian=True)
-        self.parts_lba   = parts_lba
-        self.parts_num   = parts_num
-        self.parts_size  = parts_size
-        self.crc32_parts = crc32_parts
-        self.partitions  = []
-        self._parse()
+        p_parts_lba, p_parts_num, p_parts_size, p_crc32 = struct.unpack("<QLLL", raw_data[72:92])
+        # and now we set them all...
+        self.signature   = signature or raw_data[0:8]
+        self.revision    = revision or p_rev
+        self.header_size = header_size or p_hsize
+        self.current_lba = current_lba or p_cur_lba
+        self.backup_lba  = backup_lba or p_back_lba
+        self.first_lba   = first_lba or p_first_lba
+        self.last_lba    = last_lba or p_last_lba
+        self.disk_guid   = disk_guid or GUID(raw_data[56:72], mixed_endian=True)
+        self.parts_lba   = parts_lba or p_parts_lba
+        self.parts_num   = parts_num or p_parts_num
+        self.parts_size  = parts_size or p_parts_size
+        self.crc32_parts = crc32_parts or p_crc32
+        part_data = raw_data[512: 512 + 16384]  # should be this length...
+        p_partitions = [
+            Partition(s, self.parts_size)
+            for s in slicer(part_data, self.parts_size)
+            if s != bytes(self.parts_size)
+        ]
+        self.partitions  = partitions or p_partitions
     
     def __repr__(self):
         ret  = [f"< GUID Partition Table @ {id(self)} >"]
@@ -101,15 +115,3 @@ class Table:
             f"   parts size: {str(self.parts_size):>20}",
         ]
         return "\n".join(ret)
-    
-    def _parse(self):
-        """
-        This method parses the partition entries in the following LBAs, 
-        """
-        part_data = self._raw_data[512: 512 + 16384]  # should be this length...
-        size      = self.parts_size
-        self.partitions = [
-            Partition(s, size)
-            for s in slicer(part_data, size)
-            if s != bytes(size)
-        ]

@@ -14,7 +14,8 @@ from .utils import slicer
 #       and research a bit into this being a reasonable way to convert bytes
 #       into structs (and back).
 # TODO: consider widening support for other encodings (eg: latin1, utf-8, etc)
-#       in file/directory names.       
+#       in file/directory names.
+# TODO: Linux-style LFN support (see https://lkml.org/lkml/2009/6/26/314)     
 
 
 ATTRIBUTES = {

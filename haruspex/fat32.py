@@ -91,8 +91,6 @@ def read_time(bytes_, mili=0):
     minute = min(59, minute)
     second = min(59, second)
     # that gives a few sanity checks and should catch that particular issue
-    #     note: we're still not checking the day/month correctly, we should
-    #           be using the calendar module for that
     dt = datetime.datetime(year, month, day, hour, minute, second, micros)
     return dt
 

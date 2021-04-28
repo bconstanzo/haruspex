@@ -725,6 +725,19 @@ class FAT32:
         raw_fat = self._handle.read(spf * bps)
         self.fat2 = [ v[0] for v in struct.iter_unpack("<L", raw_fat) ]
     
+    def _cluster_address(self, cluster):
+        """
+        Calculates `cluster` address in the file the filesystem is being read
+        from.
+
+        :param cluster: cluster number to get the address of
+        :return: offset in base file at which the cluster starts
+        """
+        bps = self.bytes_per_sector
+        spc = self.sectors_per_cluster
+        bca = self.base_cluster_address
+        return bca + (cluster * spc * bps)
+    
     def _read_cluster(self, cluster, nclusters=1):
         """
         Reads `nclusters` (defaults to 1) from the filesystem, starting at

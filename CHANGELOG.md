@@ -6,10 +6,12 @@
   + Create a new FileRecord on disk/Directory.
   + Allocate and free clusters on the FATs.
 
-## 0.3.1
+## 0.3.2
 
 AKA "just this one extra little thing".
 
+* Added a fat32.FAT32._cluster_address() method (0.3.2).
+* Added partition tables (MBR and GPT) write suport (0.3.2).
 * Added (basic) VHD support (0.3.1)
 * Added GPT parsing.
 * Added utils module for general classes/functions.

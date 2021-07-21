@@ -1,10 +1,21 @@
-## 0.4 (WIP)
+## 0.5 (WIP, previosly 0.4, partial changes are in place)
 + Write capabilities:
-  + Write/modify partition tables.
-  + Dump a FileRecord to bytes.
+  * Write/modify partition tables.
+  + Dump a FAT32 FileRecord to bytes.
   + Modify a Directory or FileHandle's associated record.
   + Create a new FileRecord on disk/Directory.
   + Allocate and free clusters on the FATs.
++ Added keyword-only arguments for object creation to override the parsed
+  values. This is mainly a QOL improvement when creating new structures.
+  + Now you can also complete ignore the data argument, and it defaults to an
+    empty bytes object of the corresponding length. Thus, it's now easier to
+    create new structures from scratch.
+
+## 0.4.0
+* Added enzoski as contributor! Welcome Enzo!
+* ext2 support (by enzoski).
+* Few bugfixes (check history for details).
+* Som QOL improvements from 0.5 are already in place.
 
 ## 0.3.2
 

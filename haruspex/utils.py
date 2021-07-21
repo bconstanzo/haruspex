@@ -1,6 +1,7 @@
 """
 General purpose functions that are used in different places."
 """
+import string
 
 def hexshow(data):
     """
@@ -16,7 +17,7 @@ def hexshow(data):
         out += "".join(
             f"{i}"
             for i in map(
-                lambda x: chr(x) if chr(x) in string.printable else ".", line))
+                lambda x: chr(x) if (chr(x) in string.printable and chr(x) not in "\n\r") else ".", line))
         print(out)
 
 def slicer(iterable, length):

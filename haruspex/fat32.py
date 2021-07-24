@@ -733,6 +733,7 @@ class FAT32:
         :param cluster: cluster number to get the address of
         :return: offset in base file at which the cluster starts
         """
+        cluster -= 2
         bps = self.bytes_per_sector
         spc = self.sectors_per_cluster
         bca = self.base_cluster_address

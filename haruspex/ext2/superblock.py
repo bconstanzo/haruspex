@@ -301,7 +301,7 @@ class Superblock:
     @property
     def s_mtime(self):
         """Time of last mount operation [POSIX time]"""
-        ts = self._s_mtime if self._s_mtime.timestamp() > 0. else "Not defined"
+        ts = self._s_mtime if self._s_mtime.timestamp() > 0. else None
         return ts
 
     @s_mtime.setter
@@ -312,7 +312,7 @@ class Superblock:
     @property
     def s_wtime(self):
         """Time of last write operation [POSIX time]"""
-        ts = self._s_wtime if self._s_wtime.timestamp() > 0. else "Not defined"
+        ts = self._s_wtime if self._s_wtime.timestamp() > 0. else None
         return ts
 
     @s_wtime.setter
@@ -403,7 +403,7 @@ class Superblock:
     @property
     def s_lastcheck(self):
         """Time of last check [POSIX time]"""
-        ts = self._s_lastcheck if self._s_lastcheck.timestamp() > 0. else "Not defined"
+        ts = self._s_lastcheck if self._s_lastcheck.timestamp() > 0. else None
         return ts
     
     @s_lastcheck.setter
@@ -414,7 +414,7 @@ class Superblock:
     def s_checkinterval(self):
         """Time between checks [POSIX time]"""
         # https://docs.python.org/3/library/datetime.html#datetime.timedelta.total_seconds
-        interval = self._s_checkinterval if self._s_checkinterval.total_seconds() > 0. else "Not defined"
+        interval = self._s_checkinterval if self._s_checkinterval.total_seconds() > 0. else None
         return interval
 
     @s_checkinterval.setter
@@ -638,13 +638,13 @@ class Superblock:
                 f"Number of blocks per group:                      {self.s_blocks_per_group}\n"
                 f"Number of fragments per group:                   {self.s_frags_per_group}\n"
                 f"Number of inodes per group:                      {self.s_inodes_per_group}\n"
-                f"Time of last mount operation:                    {self.s_mtime}\n"
-                f"Time of last write operation:                    {self.s_wtime}\n"
+                f"Time of last mount operation:                    {self.s_mtime or 'Not defined'}\n"
+                f"Time of last write operation:                    {self.s_wtime or 'Not defined'}\n"
                 f"Mount operations counter:                        {self.s_mnt_count}\n"
                 f"Magic signature:                                 {self.s_magic}\n"
                 f"Status flag:                                     {self.s_state}\n"
-                f"Time of last check:                              {self.s_lastcheck}\n"
-                f"Time between checks:                             {self.s_checkinterval}\n"
+                f"Time of last check:                              {self.s_lastcheck or 'Not defined'}\n"
+                f"Time between checks:                             {self.s_checkinterval or 'Not defined'}\n"
                 f"OS where filesystem was created:                 {self.s_creator_os}\n"
                 f"Revision level:                                  {self.s_rev_level}\n"
                 f"Number of first nonreserved inode:               {self.s_first_ino}\n"

@@ -213,7 +213,7 @@ class Inode:
         Last access timestamp
         """
         # https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp
-        ts = self._i_atime if self._i_atime.timestamp() > 0. else "Not defined" # if seconds elapsed since Unix epoch > 0.
+        ts = self._i_atime if self._i_atime.timestamp() > 0. else None # if seconds elapsed since Unix epoch > 0.
         return ts
 
     @i_atime.setter
@@ -232,9 +232,9 @@ class Inode:
     @property
     def i_ctime(self):
         """
-        Creation timestamp
+        Metadata last modification timestamp (inode)
         """
-        ts = self._i_ctime if self._i_ctime.timestamp() > 0. else "Not defined"
+        ts = self._i_ctime if self._i_ctime.timestamp() > 0. else None
         return ts
 
     @i_ctime.setter
@@ -245,9 +245,9 @@ class Inode:
     @property
     def i_mtime(self):
         """
-        Last modification timestamp
+        Data last modification timestamp (file contents)
         """
-        ts = self._i_mtime if self._i_mtime.timestamp() > 0. else "Not defined"
+        ts = self._i_mtime if self._i_mtime.timestamp() > 0. else None
         return ts
 
     @i_mtime.setter
@@ -260,7 +260,7 @@ class Inode:
         """
         Deletion timestamp        
         """
-        ts = self._i_dtime if self._i_dtime.timestamp() > 0. else "Not defined"
+        ts = self._i_dtime if self._i_dtime.timestamp() > 0. else None
         return ts
 
     @i_dtime.setter
@@ -405,10 +405,10 @@ class Inode:
                 f"File type and access rights:          {self.i_mode}\n"
                 f"Owner identifier:                     {self.i_uid}\n"
                 f"File length in bytes:                 {self.i_size}\n"
-                f"Time of last file access:             {self.i_atime}\n"
-                f"Time that inode last changed:         {self.i_ctime}\n"
-                f"Time that file contents last changed: {self.i_mtime}\n"
-                f"Time of file deletion:                {self.i_dtime}\n"
+                f"Time of last file access:             {self.i_atime or 'Not defined'}\n"
+                f"Time that inode last changed:         {self.i_ctime or 'Not defined'}\n"
+                f"Time that file contents last changed: {self.i_mtime or 'Not defined'}\n"
+                f"Time of file deletion:                {self.i_dtime or 'Not defined'}\n"
                 f"Group identifier:                     {self.i_gid}\n"
                 f"Hard links counter:                   {self.i_links_count}\n"
                 f"Number of data blocks of the file:    {self.i_blocks} (in units of 512 bytes)\n"

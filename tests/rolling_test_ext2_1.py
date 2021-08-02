@@ -74,7 +74,7 @@ gd = ext2.group_descriptor.GroupDescriptor(gd_data)
 """Another way: gd = GroupDescriptor(bg_inode_bitmap=999, bg_free_inodes_count=7)"""
 print(gd)
 
-# Inode parser (128 bytes)
+# Inode parser (128 bytes, but it could be a larger value depending on the revision of ext2)
 raw_inode = """
 ec 41 7b 00 00 00 10 00 00 00 00 00 e5 c1 2e 60 30 2a 00 00 00 00 00 00 db 03 0a
 00 bc 02 00 00 a0 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00

@@ -4,14 +4,17 @@ Testing the handling of a real Ext2 filesystem.
 
 import haruspex
 
-# We open a storage device and obtain through its MBR (in this case),
-# the starting sector of the desired partition.
+DISK_SECTOR_SIZE = 512
+
+# We open a storage device (administrator privileges are required) and obtain
+# through its MBR (in this case), the starting sector of the desired partition.
 fd = open(r"\\.\PhysicalDrive1", "rb")
-data = fd.read(512)
+data = fd.read(DISK_SECTOR_SIZE)
+fd.close()
 mbr = haruspex.mbr.Table(data)
 part = mbr.partitions[0]
 # and the ext2 filesystem is instantiated
-fs = haruspex.ext2.ext2.Ext2(r"\\.\PhysicalDrive1", part.start * 512)
+fs = haruspex.ext2.ext2.Ext2(r"\\.\PhysicalDrive1", part.start * DISK_SECTOR_SIZE)
 
 print(fs) # we will show part of the superblock
 
@@ -25,7 +28,7 @@ print(root_dir) # files of root directory
 print(root_dir.show_dentries()) # the actual representation of each directory entry in the root directory
 print(root_dir.show_inode()) # the representation of the root directory inode
 
-file = fs.open("/dir1/foo.txt")
+file = fs.open("/dir1/foo.txt") # absolute path of the file or directory we want to open
 print(file) # internal representation of the FileHandle object
 print(file.show_inode()) # we show the inode that represents the file
 print(file.read(7))

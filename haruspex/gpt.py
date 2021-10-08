@@ -32,8 +32,7 @@ class Partition:
         self._raw_data = data
         self._length   = length
         # now for something extra (and not completely different)
-        data   = self._raw_data
-        nlength = self._length - 56  # this is the length of the name field
+        nlength = length - 56  # this is the length of the name field
         p_guid_type = GUID(data[ 0:16], mixed_endian=True)
         p_guid_part = GUID(data[16:32], mixed_endian=True)
         p_start, p_end, p_flags = struct.unpack("<QQQ", data[32:56])
@@ -57,7 +56,7 @@ class Partition:
 
 class Table:
     """GPT Partition Table"""
-    def __init__(self, raw_data, *,
+    def __init__(self, data=bytes(512+16384), *,
                  signature=None, revision=None, header_size=None,
                  current_lba=None, backup_lba=None, first_lba=None,
                  last_lba=None, disk_guid=None, parts_lba=None, parts_num=None,
@@ -66,25 +65,25 @@ class Table:
         """
 
         """
-        self._raw_data = raw_data
-        p_rev, p_hsize, p_crc32, _res, p_cur_lba, p_back_lba, p_first_lba, p_last_lba \
-            = struct.unpack("<LLLLQQQQ", raw_data[8:56])
+        self._raw_data = data
+        p_rev, p_hsize, p_crc32, _res, p_cur_lba, p_back_lba, p_first_lba, \
+            p_last_lba = struct.unpack("<LLLLQQQQ", data[8:56])
         # disk GUID comes in the middle here...
-        p_parts_lba, p_parts_num, p_parts_size, p_crc32 = struct.unpack("<QLLL", raw_data[72:92])
+        p_parts_lba, p_parts_num, p_parts_size, p_crc32 = struct.unpack("<QLLL", data[72:92])
         # and now we set them all...
-        self.signature   = signature or raw_data[0:8]
+        self.signature   = signature or data[0:8]
         self.revision    = revision or p_rev
         self.header_size = header_size or p_hsize
         self.current_lba = current_lba or p_cur_lba
         self.backup_lba  = backup_lba or p_back_lba
         self.first_lba   = first_lba or p_first_lba
         self.last_lba    = last_lba or p_last_lba
-        self.disk_guid   = disk_guid or GUID(raw_data[56:72], mixed_endian=True)
+        self.disk_guid   = disk_guid or GUID(data[56:72], mixed_endian=True)
         self.parts_lba   = parts_lba or p_parts_lba
         self.parts_num   = parts_num or p_parts_num
         self.parts_size  = parts_size or p_parts_size
         self.crc32_parts = crc32_parts or p_crc32
-        part_data = raw_data[512: 512 + 16384]  # should be this length...
+        part_data = data[512: 512 + 16384]  # should be this length...
         p_partitions = [
             Partition(s, self.parts_size)
             for s in slicer(part_data, self.parts_size)

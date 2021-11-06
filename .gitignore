@@ -2,6 +2,8 @@
 # no need to upload that, it's brittle and py27
 legacy/
 test_files/
+# venvs on our machines...
+venv_py37/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

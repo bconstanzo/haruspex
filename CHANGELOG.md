@@ -11,6 +11,18 @@
     empty bytes object of the corresponding length. Thus, it's now easier to
     create new structures from scratch.
 
+## 0.4.2
+* Changed the interface to instantiate filesystems, now they receive an open
+  file-like instead of a path.
+  * This allows working over zipped images on Python 3.7+.
+  * This is part of the roadmap for some more thorough testing.
+* Added bits of NTFS that allows basic data carving:
+  * $FILENAME and $STANDARD_INFORMATION structures
+  * $I30 files (for directory indexes) support
+* We're starting to move out from Python 3.6, as it reaches EOL. We'll do a
+  little effort to avoid relying on 3.7+ functionalities if possible, but
+  in the future 3.6 support will be deprecated.
+
 ## 0.4.0
 * Added enzoski as contributor! Welcome Enzo!
 * ext2 support (by enzoski).

@@ -4,7 +4,12 @@ fd = open("test_files/virtual.vhd", "rb")
 data = fd.read(512)
 mbr = haruspex.mbr.Table(data)
 part = mbr.partitions[0]
-fs = haruspex.fat32.FAT32("test_files/virtual.vhd", part.start * 512)
+fat32_handle = open("test_files/virtual.vhd", "rb")
+# in theory we could do:
+#     fat32_handle = fd
+# however that changesthe handles position in the file and the result changes
+# from the standard behavior so far
+fs = haruspex.fat32.FAT32(fat32_handle, part.start * 512)
 while data:
     if b"TXT" in data:
         break

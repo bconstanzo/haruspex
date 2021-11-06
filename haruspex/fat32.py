@@ -660,10 +660,17 @@ class FAT32:
     """
     Class that gathers methods and objects to handle a FAT32 filesystem.
     """
-    def __init__(self, path, base_address=0):
-        self.path          = path
+    def __init__(self, handle, base_address=0):
+        """
+        FAT32 instance.
+
+        :param handle: 'rb' or 'rb+' file-like object that holds a FAT32
+            filesystem
+        :param base_address: byte offset of the FAT32 filesystem in `handle`
+            (defaults to 0, you'll most certainly want to provide a value)
+        """
         self._base_address = base_address
-        self._handle       = open(path, "rb+")
+        self._handle       = handle
         self._handle.seek(base_address)
         # and now for the header data...}
         buffer = self._handle.read(512)

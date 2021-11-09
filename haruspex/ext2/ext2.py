@@ -418,7 +418,7 @@ class Ext2:
         #         (due to what I do in the __str__ and in the 2 lines prior to make the list of group descriptors*).
 
     def __repr__(self):
-        return f"< ext2 @ {self.base_address} of {self.path}>\n"
+        return f"< ext2 @ {self.base_address} >\n"
 
     def __str__(self):
         # NOTE: The filesystem is divided into blocks as follows:

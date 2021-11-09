@@ -544,7 +544,7 @@ class FileHandle:
         self._readable    = True  # will set along with mode, when supported
     
     def __repr__(self):
-        return f"< FileHandle for {self.path}>"
+        return f"< FileHandle for {self.path} >"
     
     def __str__(self):
         return self.__repr__()
@@ -700,7 +700,7 @@ class FAT32:
         self._post_init()
     
     def __repr__(self):
-        return f"< FAT32 @ {self._base_address} of {self.path}>"
+        return f"< FAT32 @ {self._base_address} >"
     
     def __str__(self):
         return (

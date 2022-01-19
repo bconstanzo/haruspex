@@ -371,21 +371,20 @@ class Ext2:
     """
     Class that handles an ext2 filesystem.
 
-    :param path: It is the way to access the storage device.
-        On Windows, it is in the format: r"\\.\PhysicalDriveX", and on Linux "/dev/sdX".
+    :param handle: It is a file-like object that handles operations on a
+        storage device or virtual hard drive. For now, it must be read-only ('rb').
     :param base_address: It is the offset (byte number), inside the device, where
         the partition (with an ext2 fs) that we want to analyze, begins.
     """
     def __init__(self, handle, base_address):
         """
-        The storage device is opened.
-        The byte pointer is positioned at the beginning of the desired partition.
+        The byte pointer (handle) is positioned at the beginning of the desired partition.
         And the boot area, the superblock (original), the group descriptor table
         (original) and the root inode, are read.
         """
+        self.handle = handle # for security, I should set this attribute as private through properties
         self.base_address = base_address
 
-        self.handle = handle # read-only for now (for security, I should set this attribute as private through properties)
         self.handle.seek(self.base_address)
 
         # the first 2 sectors of the partition correspond to the boot area (are unused by the ext2 filesystem).

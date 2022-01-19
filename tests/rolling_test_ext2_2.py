@@ -6,15 +6,17 @@ import haruspex
 
 DISK_SECTOR_SIZE = 512
 
-# We open a storage device (administrator privileges are required) and obtain
-# through its MBR (in this case), the starting sector of the desired partition.
-fd = open(r"\\.\PhysicalDrive1", "rb")
+# We open a storage device (on Windows, the path is in the format: r"\\.\PhysicalDriveX",
+# and on Linux: "/dev/sdX") and obtain through its MBR (in this case), the starting sector
+# of the desired partition. Note: we could also open a .vhd file.
+fd = open(r"\\.\PhysicalDrive1", "rb") # in this case, administrator privileges are required
 data = fd.read(DISK_SECTOR_SIZE)
 fd.close()
 mbr = haruspex.mbr.Table(data)
 part = mbr.partitions[0]
 # and the ext2 filesystem is instantiated
-fs = haruspex.ext2.ext2.Ext2(r"\\.\PhysicalDrive1", part.start * DISK_SECTOR_SIZE)
+ext2_handle = open(r"\\.\PhysicalDrive1", "rb") # the storage device is opened again to avoid inconsistencies with the handle position
+fs = haruspex.ext2.ext2.Ext2(ext2_handle, part.start * DISK_SECTOR_SIZE)
 
 print(fs) # we will show part of the superblock
 

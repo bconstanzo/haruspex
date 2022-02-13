@@ -285,7 +285,7 @@ class VHDFooter:
     @identifier.setter
     def identifier(self, value):
         if not(isinstance(value, GUID)):
-            raise ValueError(f"expected GUID, got {type(identifier)} instead")
+            raise ValueError(f"expected GUID, got {type(value)} instead")
         self._identifier = value
     
     @property

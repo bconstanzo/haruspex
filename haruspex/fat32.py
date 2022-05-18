@@ -5,6 +5,7 @@ import calendar
 import datetime
 import struct
 import sys
+from time import time
 
 
 from .utils import slicer
@@ -57,6 +58,21 @@ def read_attributes(value):
         ret[k] = bool(value & v)
     return ret
 
+def write_attributes(attrs):
+    """
+    Receives an attribute dictionary, and converts it back into a (byte sized)
+    integer value, based on the `ATTRIBUTES` constant.
+
+    :param attrs: dictionary of attributes, checked against the `ATTRIBUTES`
+        constant.
+    :return: integer value, made fit into a byte
+    """
+    value = 0
+    for k, v in ATTRIBUTES.items():
+        if k in attrs and attrs[k]:
+            value += v
+    return value & 0xff  # we and it with 0xff to make sure it fits in a byte
+
 
 def read_time(bytes_, mili=0):
     """
@@ -93,6 +109,49 @@ def read_time(bytes_, mili=0):
     # that gives a few sanity checks and should catch that particular issue
     dt = datetime.datetime(year, month, day, hour, minute, second, micros)
     return dt
+
+def write_time(dt, *, full=False, date_only=False):
+    """
+    Receives a datetime object (plus optional flags) and returns the bytes that
+    represent that datetime in FAT32 timestamp format.
+
+    :param dt: datetime object to convert to bytes
+    :param full: boolean flag, use to get a full timestamp (5 bytes)
+    :param date_only: boolean flag, use to get just a date timestamp (2 bytes).
+        NOTE: this takes precedence over `full`.
+    :return: 2, 4 or 5 bytes depending on the flags, that represent the datetime
+
+
+    Receives time + date bytes in `bytes_`, and returns a datetime object.
+    Checks for pathological 0xffff patterns.
+
+    :param bytes_: raw value, made from the the time+date fields in the raw
+        directory entry/file record.
+    :param mili: the raw byte (int) that encodes the 10 milisecond precision,
+        for timestamps that support it (defaults to 0)
+    :return: datetime.datetime object
+    """
+    # first we get the time
+    hour, minute, second = dt.hour, dt.minute, dt.second
+    second = second // 2
+    mili = (dt.second - 2 * second) * 100
+    mili += (dt.microsecond // 10_000)
+    raw_time = (hour << 11) | (minute << 5) | second
+    # now we get the date
+    year, month, day = dt.year, dt.month, dt.day
+    year -= 1980
+    raw_date = (year << 9) | (month << 5) | day
+    time = struct.pack("<H", raw_time)
+    date = struct.pack("<H", raw_date)
+    # now we're ready to build it all into a string
+    if date_only:
+        return date
+    value = time + date
+    if not full:
+        return value
+
+    extra = struct.pack("B", mili)
+    return extra + value
 
 
 class FileRecord:
@@ -413,6 +472,27 @@ class FileRecord:
         ]
         return "".join(ret)
     
+    def __bytes__(self):
+        name = self.name
+        ext  = self.ext
+        name += b" " * (8 - len(name))
+        ext  += b" " * (3 - len(ext))
+        cluster_hi = (self.cluster & 0xffff0000) >> 16
+        cluster_lo = (self.cluster & 0x0000ffff)
+
+        return struct.pack(
+            "<11sBB5s2sH4sHL",
+            name + ext,
+            write_attributes(self.attributes),
+            self._flags,
+            write_time(self.created, full=True),
+            write_time(self.last_access, date_only=True),
+            cluster_hi,
+            write_time(self.modified),
+            cluster_lo,
+            self.size
+        )
+
     def _parse(self):
         """
         Parses self._raw_data and updates the properties of the file.

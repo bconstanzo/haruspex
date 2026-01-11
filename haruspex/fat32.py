@@ -120,22 +120,11 @@ def write_time(dt, *, full=False, date_only=False):
     :param date_only: boolean flag, use to get just a date timestamp (2 bytes).
         NOTE: this takes precedence over `full`.
     :return: 2, 4 or 5 bytes depending on the flags, that represent the datetime
-
-
-    Receives time + date bytes in `bytes_`, and returns a datetime object.
-    Checks for pathological 0xffff patterns.
-
-    :param bytes_: raw value, made from the the time+date fields in the raw
-        directory entry/file record.
-    :param mili: the raw byte (int) that encodes the 10 milisecond precision,
-        for timestamps that support it (defaults to 0)
-    :return: datetime.datetime object
     """
     # first we get the time
     hour, minute, second = dt.hour, dt.minute, dt.second
     second = second // 2
-    mili = (dt.second - 2 * second) * 100
-    mili += (dt.microsecond // 10_000)
+    mili = (dt.second - 2 * second) * 100 + (dt.microsecond // 10_000)
     raw_time = (hour << 11) | (minute << 5) | second
     # now we get the date
     year, month, day = dt.year, dt.month, dt.day
